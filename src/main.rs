@@ -22,21 +22,12 @@ mod hi;
 mod template;
 
 fn main() {
-    // use iron::Handler;
-    // fn static_file_mount() -> impl Handler {
-    //     println!("in static_file_mount");
-    //     let mut mount = Mount::new();
-    //     mount.mount("/", Static::new(Path::new("/Users/mrussell/code/rust/tv-trackr/target/debug/tv-trackr/static/")));
-    //     mount
-    // }
-
     let router = router!(
         hello_world:  get "/"         => hello_world::handler(),
         log_file:     get "/log-file" => log_file::handler(),
         count:        get  "/count"   => counter::handler(),
         hi:           get "/hi/:name" => hi::handler(),
         template:     get "/template" => template::handler(),
-        // static_files: get "/static"   => static_file_mount(),
     );
 
     use mount::Mount;
@@ -45,7 +36,8 @@ fn main() {
     let mut mount = Mount::new();
     mount
         .mount("/", router)
-        .mount("/static/", Static::new(Path::new("/Users/mrussell/code/rust/tv-trackr/static")));
+        .mount("/static/", Static::new(Path::new("/Users/mrussell/code/rust/tv-trackr/static")))
+        ;
 
     let sock_addr = "localhost:3000";
     let _server = Iron::new(mount).http(sock_addr).unwrap();
