@@ -7,6 +7,7 @@ authors = ["Matt Russell <russell.d.matt@gmail.com>"]
 iron = "0.4.*"
 persistent = "0.2.1"
 router = "0.4.0"
+handlebars = "0.23.0"
 handlebars-iron = "0.20.0"
 mount = "0.2.1"
 staticfile = "0.3.1"

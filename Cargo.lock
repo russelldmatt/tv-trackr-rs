@@ -3,6 +3,7 @@ name = "tv-trackr"
 version = "0.1.0"
 dependencies = [
  "chrono 0.2.25 (registry+https://github.com/rust-lang/crates.io-index)",
+ "handlebars 0.23.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "handlebars-iron 0.20.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "iron 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "mount 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
