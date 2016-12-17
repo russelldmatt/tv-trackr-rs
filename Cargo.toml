@@ -1,0 +1,10 @@
+[package]
+name = "tv-trackr"
+version = "0.1.0"
+authors = ["Matt Russell <russell.d.matt@gmail.com>"]
+
+[dependencies]
+iron = "0.4.*"
+persistent = "0.2.1"
+router = "0.4.0"
+rustc-serialize = "*"
