@@ -14,6 +14,7 @@ pub fn handler() -> impl Handler {
         println!("{}", response);
         Ok(Response::with((status::Ok, response)))
     }
-    Chain::new(hi)
+    // example of non-Chain return value
+    hi
 }
 

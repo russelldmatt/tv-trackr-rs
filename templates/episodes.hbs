@@ -1,0 +1,17 @@
+<head>
+    <!-- /Users/mrussell/code/rust/tv-trackr/templates/ -->
+    <link href="/static/head.html" rel="import" />
+    <link href="/static/styles.css" type="text/css" rel="stylesheet" />
+</head>
+<body>
+    {{#each shows}}
+	<div>
+	  <h3>{{ name }}</h3>
+	  <div style="white-space:nowrap">
+	      {{#each episodes}}
+		  <div class="box {{ seen_class }}">Season {{ season }}, Episode {{ episode }}<br /><span class="aire_date">{{ aire_date }}</span><br />{{ name }}</div>
+	      {{/each}}
+	  </div>
+	</div>
+    {{/each}}
+</body>
