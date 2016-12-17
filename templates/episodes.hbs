@@ -1,44 +1,44 @@
 <head>
-    <!-- /Users/mrussell/code/rust/tv-trackr/templates/ -->
-    <link href="/static/head.html" rel="import" />
-    <link href="/static/styles.css" type="text/css" rel="stylesheet" />
+  <!-- /Users/mrussell/code/rust/tv-trackr/templates/ -->
+  <link href="/static/head.html" rel="import" />
+  <link href="/static/styles.css" type="text/css" rel="stylesheet" />
 
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 
-    <script type="text/javascript">
-     JSONTest = function(id) {
-
-	 var resultDiv = $("#response_from_server");
-	 
-	 $.ajax({
-             url: "http://localhost:3000/test-post",
-             type: "POST",
-             data: { id: id },
-             dataType: "json",
-             success: function (result) {
-		 resultDiv.html(result)
-             },
-             error: function (xhr, ajaxOptions, thrownError) {
-		 alert(xhr.status);
-		 alert(thrownError);
-             }
-	 });
-     };
-    </script>
-
+  <script type="text/javascript">
+   JSONTest = function(id) {
+	     var resultDiv = $("#response_from_server");
+	     
+	     $.ajax({
+           url: "http://localhost:3000/test-post",
+           type: "POST",
+           data: { id: id },
+           dataType: "json",
+           success: function (result) {
+		           resultDiv.html(result)
+           },
+           error: function (xhr, ajaxOptions, thrownError) {
+		           alert(xhr.status);
+		           alert(thrownError);
+           }
+	     });
+   };
+  </script>
 </head>
 <body>
-</head>
-<body>
-    <div id="response_from_server"></div>
-    {{#each shows}}
-	<div>
-	  <h3>{{ name }}</h3>
-	  <div style="white-space:nowrap">
-	      {{#each episodes}}
-		  <div id="{{ id }}" onclick="JSONTest({{ id }})" class="box {{ seen_class }}">Season {{ season }}, Episode {{ episode }}<br /><span class="aire_date">{{ aire_date_string }}</span><br />{{ name }}</div>
-	      {{/each}}
+  <div id="response_from_server"></div>
+  {{#each shows as |show|}}
+    <div>
+	    <h3>{{ name }}</h3>
+	    <div style="white-space:nowrap">
+		    {{#each episodes}}
+		      <div class="box {{ seen_class }}" onclick="JSONTest({{ id }})">
+			      Season {{ season }}, Episode {{ episode }}<br />
+			      <span class="aire_date">{{ aire_date_string }}</span><br />
+			      {{ name }}
+		      </div>
+        {{/each}}
+	    </div>
 	  </div>
-	</div>
-    {{/each}}
+  {{/each}}
 </body>
