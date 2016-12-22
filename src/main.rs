@@ -13,10 +13,13 @@ extern crate staticfile;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
 extern crate rustc_serialize;
+extern crate time;
 extern crate chrono;
+#[macro_use] extern crate lazy_static;
 
 use iron::prelude::*;
 
+mod show;
 mod hello_world;
 mod log_file;
 mod counter;

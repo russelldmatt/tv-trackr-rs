@@ -6,22 +6,22 @@
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 
   <script type="text/javascript">
-   JSONTest = function(id) {
-	     var resultDiv = $("#response_from_server");
-	     
-	     $.ajax({
+   ClickedId = function(id) {
+       var resultDiv = $("#response_from_server");
+       
+       $.ajax({
            url: "http://localhost:3000/test-post",
            type: "POST",
            data: { id: id },
            dataType: "json",
            success: function (result) {
-		           resultDiv.html(result)
+	       resultDiv.html(result)
            },
            error: function (xhr, ajaxOptions, thrownError) {
-		           alert(xhr.status);
-		           alert(thrownError);
+	       alert(xhr.status);
+	       alert(thrownError);
            }
-	     });
+       });
    };
   </script>
 </head>
@@ -32,7 +32,7 @@
 	    <h3>{{ name }}</h3>
 	    <div style="white-space:nowrap">
 		    {{#each episodes}}
-		      <div class="box {{ seen_class }}" onclick="JSONTest({{ id }})">
+		      <div class="box {{ seen_class }}" onclick="ClickedId({{ id }})">
 			      Season {{ season }}, Episode {{ episode }}<br />
 			      <span class="aire_date">{{ aire_date_string }}</span><br />
 			      {{ name }}
