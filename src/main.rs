@@ -19,6 +19,7 @@ extern crate chrono;
 
 use iron::prelude::*;
 
+mod time_wrapper;
 mod show;
 mod hello_world;
 mod log_file;

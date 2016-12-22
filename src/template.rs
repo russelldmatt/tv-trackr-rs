@@ -8,6 +8,7 @@ use serde_json;
 fn handle_shows(_: &mut Request) -> IronResult<Response> {
     println!("shows");
     use show::*;
+    use time_wrapper::Time as Time;
     let mut response = Response::new();
     let ballers = 
         Show {
