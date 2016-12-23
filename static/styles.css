@@ -19,6 +19,11 @@ body {
     font-weight:normal;
     text-align:center;
 }
+
+/* Get bigger on hover */
+.box { transition: all .2s ease-in-out; }
+.box:hover { transform: scale(1.1); }
+
 .new {
     /* background-color : LightGreen; */
     background-color: #9EEBA1;
