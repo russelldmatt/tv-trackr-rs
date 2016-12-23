@@ -15,7 +15,7 @@ extern crate rustc_serialize;
 extern crate serde_json;
 extern crate bincode;
 extern crate time;
-extern crate chrono;
+#[macro_use] extern crate chrono;
 #[macro_use] extern crate lazy_static;
 
 use iron::prelude::*;
@@ -87,6 +87,31 @@ fn main() {
     println!("serving on {}...", sock_addr);
 }
 
+#[cfg(test)]
+mod tests { 
+    #[test]
+    fn chrono_to_string() {
+        use chrono::*;
+        let now = Local::today();
+        println!("{}", now);
+        let s = format!("{}", now.format("%B %d, %Y"));
+        println!("{}", s);
+        assert!(false);
+    }
 
+    #[test]
+    fn chrono_of_string() {
+        use chrono::*;
+        let date = "December 23, 2016";
+        let mut parsed = format::parsed::Parsed::new();
+        format::parse(&mut parsed, date, format::strftime::StrftimeItems::new("%B %d, %Y")).unwrap();
+        // let now = Local::today();
+        // println!("{}", now);
+        // let s = format!("{}", now.format("%B %d, %Y"));
+        println!("{:?}", parsed);
+        println!("{}", parsed.to_naive_date().unwrap());
+        assert!(false);
+    }
+}
 
 

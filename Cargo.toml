@@ -7,8 +7,8 @@ authors = ["Matt Russell <russell.d.matt@gmail.com>"]
 iron = "0.4.*"
 persistent = "0.2.1"
 router = "0.4.0"
-handlebars = "0.23.0"
-handlebars-iron = "0.20.0"
+handlebars = { version = "0.23.0", features = ["serde_type"] }
+handlebars-iron = { version = "0.20.0", features = ["serde_type"] }
 mount = "0.2.1"
 staticfile = "0.3.1"
 rustc-serialize = "*"
@@ -17,5 +17,5 @@ serde_derive = "0.8.20"
 serde_json = "0.8.4"
 bincode = "0.6.0"
 time = "0.1.35"
-chrono = "0.2.25"
+chrono = { version = "0.2", features = ["serde", "rustc-serialize"] }
 lazy_static = "0.2"

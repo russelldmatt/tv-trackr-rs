@@ -28,7 +28,6 @@ pub struct Episode {
     pub season: i32,
     pub episode: i32,
     pub aire_date: Time,
-    pub aire_date_string: String,
     pub seen_class: String,
 }
 
@@ -40,18 +39,15 @@ mod tests {
     use time;
 
     lazy_static! {
-        static ref EXAMPLE_EPISODE: Episode = {
-            let aire_date = Time(time::now());
+        static ref EXAMPLE_EPISODE: Episode = 
             Episode {
                 id: 1,
                 name: "test".to_string(),
                 season: 1,
                 episode: 2,
-                aire_date: aire_date.clone(),
-                aire_date_string: aire_date.strftime("%B %d, %Y").unwrap().to_string(),
+                aire_date: Time(time::now()),
                 seen_class: "seen".to_string(),
-            }
-        };
+            };
     }
 
     #[test]

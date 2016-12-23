@@ -16,29 +16,21 @@ fn handle_shows(_: &mut Request) -> IronResult<Response> {
             episodes: {
                 use time;
                 vec![
-                    {
-                        let aire_date = Time(time::strptime("2016-09-25", "%Y-%m-%d").unwrap());
-                        Episode { 
-                            id: 1,
-                            name:"Game Day".to_string(),
-                            season: 2,
-                            episode: 10,
-                            aire_date: aire_date.clone(),
-                            aire_date_string: aire_date.strftime("%B %d, %Y").unwrap().to_string(),
-                            seen_class: "seen".to_string()
-                        }
+                    Episode { 
+                        id: 1,
+                        name:"Game Day".to_string(),
+                        season: 2,
+                        episode: 10,
+                        aire_date: Time(time::strptime("2016-09-25", "%Y-%m-%d").unwrap()),
+                        seen_class: "seen".to_string()
                     },
-                    {
-                        let aire_date = Time(time::strptime("2016-09-25", "%Y-%m-%d").unwrap());
-                        Episode { 
-                            id: 2,
-                            name:"Million Bucks in a Bag".to_string(),
-                            season: 2,
-                            episode: 9,
-                            aire_date: aire_date.clone(),
-                            aire_date_string: aire_date.strftime("%B %d, %Y").unwrap().to_string(),
-                            seen_class: "seen".to_string()
-                        }
+                    Episode { 
+                        id: 2,
+                        name:"Million Bucks in a Bag".to_string(),
+                        season: 2,
+                        episode: 9,
+                        aire_date: Time(time::strptime("2016-09-25", "%Y-%m-%d").unwrap()),
+                        seen_class: "seen".to_string()
                     },
                 ]
             }
@@ -63,7 +55,23 @@ fn handle_shows(_: &mut Request) -> IronResult<Response> {
 }
 
 pub fn handler() -> impl Handler {
-    let mut hbse = HandlebarsEngine::new();
+    // helpers
+    // https://github.com/sunng87/handlebars-rust#extensible-helper-system
+    use handlebars::{Helper, Handlebars, Context, RenderContext, RenderError};
+    use time_wrapper::Time as Time;
+    fn date_helper (_: &Context, h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
+        // just for example, add error check for unwrap
+        let param = h.param(0).unwrap().value();
+        let time: Time = serde_json::value::from_value(param.clone()).unwrap();
+        let rendered = time.strftime("%B %d, %Y").unwrap().to_string();
+        try!(rc.writer.write(rendered.into_bytes().as_ref()));
+        Ok(())
+    }
+
+    let mut hb = Handlebars::new();
+    hb.register_helper("date", Box::new(date_helper));
+    let mut hbse = HandlebarsEngine::from(hb);
+
     // CR mrussell: configurable tempate dir
     hbse.add(Box::new(DirectorySource::new("/Users/mrussell/code/rust/tv-trackr/templates/", ".hbs")));
     // load templates from all registered sources
