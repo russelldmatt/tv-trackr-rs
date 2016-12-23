@@ -287,4 +287,17 @@ mod tests {
         assert!(false);
     }
 
+    #[test]
+    fn test3() {
+        use bincode;
+        let time = Time(time::strptime("June 28, 2015", "%B %d, %Y").unwrap());
+        println!("time: {:?}", time);
+        let bytes = bincode::serde::serialize(&time, bincode::SizeLimit::Infinite).unwrap();
+        println!("bytes: {:?}", bytes);
+        let round_tripped: Time = bincode::serde::deserialize(&bytes[..]).unwrap();
+        println!("round_tripped: {:?}", round_tripped);
+        println!("eq?: {}", round_tripped == time);
+        assert!(round_tripped == time);
+        assert!(false);
+    }
 }
