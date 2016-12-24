@@ -16,16 +16,16 @@ pub struct Episode {
     pub seen_class: String,
 }
 
-
 #[cfg(test)]
 mod tests { 
     use super::*;
-    use time;
+    use chrono::naive::date::NaiveDate;
 
     fn today () -> NaiveDate {
         use chrono::offset::local::Local;
+        use chrono::Datelike;
         let today = Local::today();
-        NaiveDate.from_ymd(today.year(), today.month(), today.date())
+        NaiveDate::from_ymd(today.year(), today.month(), today.day())
     }
 
     lazy_static! {
