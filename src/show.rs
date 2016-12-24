@@ -1,24 +1,9 @@
-use time_wrapper::Time as Time;
+use chrono::naive::date::NaiveDate;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Show {
     pub name: String,
     pub episodes: Vec<Episode>,
-}
-
-// CR mrussell: fix
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Date {
-    pub year: i32,
-    pub month: i32,
-    pub day: i32,
-}
-
-impl ToString for Date {
-    fn to_string(&self) -> String {
-        // self.date = datetime.datetime.strptime(d['aire_date'], '%B %d, %Y').date()
-        format!("{} {} {}", self.year, self.month, self.day)
-    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -27,7 +12,7 @@ pub struct Episode {
     pub name: String,
     pub season: i32,
     pub episode: i32,
-    pub aire_date: Time,
+    pub aire_date: NaiveDate,
     pub seen_class: String,
 }
 
@@ -35,8 +20,13 @@ pub struct Episode {
 #[cfg(test)]
 mod tests { 
     use super::*;
-    use time_wrapper::Time as Time;
     use time;
+
+    fn today () -> NaiveDate {
+        use chrono::offset::local::Local;
+        let today = Local::today();
+        NaiveDate.from_ymd(today.year(), today.month(), today.date())
+    }
 
     lazy_static! {
         static ref EXAMPLE_EPISODE: Episode = 
@@ -45,7 +35,7 @@ mod tests {
                 name: "test".to_string(),
                 season: 1,
                 episode: 2,
-                aire_date: Time(time::now()),
+                aire_date: today(),
                 seen_class: "seen".to_string(),
             };
     }

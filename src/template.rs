@@ -8,20 +8,28 @@ use serde_json;
 fn handle_shows(_: &mut Request) -> IronResult<Response> {
     println!("shows");
     use show::*;
-    use time_wrapper::Time as Time;
+    use chrono;
+    
+    fn date_of_string(date_str: &str) -> chrono::naive::date::NaiveDate {
+        use chrono::format;
+        let mut parsed = format::parsed::Parsed::new();
+        let format_string = format::strftime::StrftimeItems::new("%B %d, %Y");
+        format::parse(&mut parsed, date_str, format_string).unwrap();
+        parsed.to_naive_date().unwrap()
+    }
+
     let mut response = Response::new();
     let ballers = 
         Show {
             name: "Ballers".to_string(),
             episodes: {
-                use time;
                 vec![
                     Episode { 
                         id: 1,
                         name:"Game Day".to_string(),
                         season: 2,
                         episode: 10,
-                        aire_date: Time(time::strptime("2016-09-25", "%Y-%m-%d").unwrap()),
+                        aire_date: date_of_string("September 25, 2016"),
                         seen_class: "seen".to_string()
                     },
                     Episode { 
@@ -29,7 +37,7 @@ fn handle_shows(_: &mut Request) -> IronResult<Response> {
                         name:"Million Bucks in a Bag".to_string(),
                         season: 2,
                         episode: 9,
-                        aire_date: Time(time::strptime("2016-09-25", "%Y-%m-%d").unwrap()),
+                        aire_date: date_of_string("September 25, 2016"),
                         seen_class: "seen".to_string()
                     },
                 ]
@@ -58,12 +66,13 @@ pub fn handler() -> impl Handler {
     // helpers
     // https://github.com/sunng87/handlebars-rust#extensible-helper-system
     use handlebars::{Helper, Handlebars, Context, RenderContext, RenderError};
-    use time_wrapper::Time as Time;
+    use chrono;
     fn date_helper (_: &Context, h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
         // just for example, add error check for unwrap
         let param = h.param(0).unwrap().value();
-        let time: Time = serde_json::value::from_value(param.clone()).unwrap();
-        let rendered = time.strftime("%B %d, %Y").unwrap().to_string();
+        let date: chrono::naive::date::NaiveDate = 
+            serde_json::value::from_value(param.clone()).unwrap();
+        let rendered = format!("{}", date.format("%B %d, %Y"));
         try!(rc.writer.write(rendered.into_bytes().as_ref()));
         Ok(())
     }
