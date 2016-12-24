@@ -9,7 +9,6 @@ extern crate handlebars_iron;
 #[macro_use] extern crate router;
 extern crate mount;
 extern crate staticfile;
-extern crate rustc_serialize;
 #[macro_use] extern crate serde;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
@@ -51,9 +50,10 @@ fn test_post_handler() -> impl Handler {
         let mut count = count.write().unwrap();
         *count += 1;
 
-        use rustc_serialize::json::Json;
-        use rustc_serialize::json;
-        let response = json::encode(&Json::String(format!("successfully received #{}", *count))).unwrap();
+        use serde_json;
+        let json_response = 
+            serde_json::value::Value::String(format!("successfully received #{}", *count));
+        let response = format!("{}", json_response);
         Ok(Response::with((status::Ok, response)))
     }
 

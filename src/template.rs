@@ -49,13 +49,6 @@ fn handle_shows(_: &mut Request) -> IronResult<Response> {
         shows: Vec<Show>,
     }
 
-    use rustc_serialize::json::{Json, ToJson};
-    impl ToJson for Data {
-        fn to_json(&self) -> Json { 
-            Json::from_str(serde_json::to_string(&self).unwrap().as_ref()).unwrap()
-        }
-    }
-
     let data = Data { shows: vec![ballers] };
     response.set_mut(Template::new("episodes", data)).set_mut(status::Ok);
     println!("{}", response);

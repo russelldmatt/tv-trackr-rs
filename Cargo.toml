@@ -11,7 +11,6 @@ handlebars = { version = "0.23.0", features = ["serde_type"] }
 handlebars-iron = { version = "0.20.0", features = ["serde_type"] }
 mount = "0.2.1"
 staticfile = "0.3.1"
-rustc-serialize = "*"
 serde = "0.8.20"
 serde_derive = "0.8.20"
 serde_json = "0.8.4"
