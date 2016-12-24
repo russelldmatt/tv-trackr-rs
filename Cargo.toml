@@ -18,3 +18,4 @@ bincode = "0.6.0"
 time = "0.1.35"
 chrono = { version = "0.2", features = ["serde", "rustc-serialize"] }
 lazy_static = "0.2"
+itertools = "0.5.8"

@@ -16,6 +16,7 @@ extern crate bincode;
 extern crate time;
 #[macro_use] extern crate chrono;
 #[macro_use] extern crate lazy_static;
+extern crate itertools;
 
 use iron::prelude::*;
 
