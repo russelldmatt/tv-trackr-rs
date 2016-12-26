@@ -11,6 +11,12 @@ impl fmt::Display for Name {
     }
 }
 
+impl<'a> From<&'a str> for Name {
+    fn from(s: &str) -> Name {
+        Name (s.to_string())
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Show {
     pub name: String,
@@ -51,31 +57,11 @@ mod tests {
 
     #[test]
     fn test_json() {
-        use serde_json::value::ToJson;
+        use serde_json;
+        use serde_json::value::{ToJson, Value};
         let json = Episode::to_json(&EXAMPLE_EPISODE);
-        println!("{:?}", json);
-        assert!(false)
-    }
-
-    #[test]
-    fn unique_id_from_string() {
-        use std::str::FromStr;
-        println!("{:?}", UniqueId::from_str("show-name.6.2"));
-        println!("{:?}", UniqueId::from_str("show.name.6.2"));
-        println!("{:?}", UniqueId::from_str("Modern Family.6.2"));
-        assert!(false)
-    }
-
-    #[test]
-    fn unique_id_to_string() {
-        let uid = UniqueId { show: Name("hi.bye-name".to_string()), season: 4, episode: 10 };
-        println!("{}", uid.to_string());
-        let uid = UniqueId { show: Name("Modern Family".to_string()), season: 4, episode: 10 };
-        let uid_str = uid.to_string();
-        println!("{}", uid_str);
-        use std::str::FromStr;
-        let uid_round_tripped = UniqueId::from_str(&uid_str).unwrap();
-        println!("eq? {}", uid_round_tripped == uid);
-        assert!(false)
+        let test_against: Value = 
+            serde_json::from_str(r#"{"aire_date":"2016-12-26","episode":2,"name":"test","season":1,"seen_class":"seen"}"#).unwrap();
+        assert_eq!(test_against, json);
     }
 }

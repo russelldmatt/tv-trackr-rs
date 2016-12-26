@@ -15,7 +15,7 @@ impl ToString for UniqueId {
 }
 
 use std::num::ParseIntError;
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ParseUniqueIdError {
     NoEpisode,
     CannotParseEpisode(ParseIntError),
@@ -45,3 +45,38 @@ impl FromStr for UniqueId {
     }
 }
 
+#[cfg(test)]
+mod tests { 
+    use show::*;
+
+    #[test]
+    fn unique_id_from_string() {
+        use std::str::FromStr;
+        assert_eq!(Ok (UniqueId { show: Name::from("show-name"), season: 6, episode: 2 }),
+                   UniqueId::from_str("show-name.6.2")
+        );
+        assert_eq!(Ok (UniqueId { show: Name::from("show.name"), season: 6, episode: 2 }),
+                   UniqueId::from_str("show.name.6.2")
+        );
+        assert_eq!(Ok (UniqueId { show: Name::from("Modern Family"), season: 6, episode: 2 }),
+                   UniqueId::from_str("Modern Family.6.2")
+        );
+    }
+
+    #[test]
+    fn unique_id_to_string() {
+        let uid = UniqueId { show: Name::from("hi.bye-name"), season: 4, episode: 10 };
+        assert_eq!("hi.bye-name.4.10", uid.to_string());
+        let uid = UniqueId { show: Name::from("Modern Family"), season: 4, episode: 10 };
+        assert_eq!("Modern Family.4.10", uid.to_string());
+    }
+
+    #[test]
+    fn round_trip() {
+        use std::str::FromStr;
+        let uid = UniqueId { show: Name::from("Modern Family"), season: 4, episode: 10 };
+        let uid_str = uid.to_string();
+        let uid_round_tripped = UniqueId::from_str(&uid_str).unwrap();
+        assert_eq!(uid_round_tripped, uid)
+    }
+}
