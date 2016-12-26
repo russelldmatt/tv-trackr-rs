@@ -1,47 +1,13 @@
 use chrono::naive::date::NaiveDate;
-use std::str::FromStr;
+pub use unique_id::UniqueId;
+use std::fmt;
 
-#[derive(Debug)]
-pub struct UniqueId {
-    pub show: String,
-    pub season: i32,
-    pub episode: i32,
-}
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct Name(pub String);
 
-impl ToString for UniqueId {
-    fn to_string(&self) -> String {
-        format!("{}.{}.{}", self.show, self.season, self.episode)
-    }
-}
-
-use std::num::ParseIntError;
-#[derive(Debug)]
-pub enum ParseUniqueIdError {
-    NoEpisode,
-    CannotParseEpisode(ParseIntError),
-    NoSeason,
-    CannotParseSeason(ParseIntError),
-    NoShow,
-}
-
-impl FromStr for UniqueId {
-    type Err = ParseUniqueIdError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        use self::ParseUniqueIdError::*;
-        let mut rsplit = s.rsplit(".");
-        let episode: i32 =
-            rsplit.next().ok_or(NoEpisode)?.parse().map_err(CannotParseEpisode)?;
-        let season: i32 =
-            rsplit.next().ok_or(NoSeason)?.parse().map_err(CannotParseSeason)?;
-        let show_parts: Vec<&str> = rsplit.collect();
-        if show_parts.len() <= 0 {
-            Err(NoShow)
-        } else {
-            use itertools::Itertools;
-            let show: String = show_parts.into_iter().rev().intersperse(".").collect();
-            Ok(UniqueId { show, season, episode })
-        }
+impl fmt::Display for Name {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
@@ -53,7 +19,6 @@ pub struct Show {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Episode {
-    pub id: i64,
     pub name: String,
     pub season: i32,
     pub episode: i32,
@@ -76,7 +41,6 @@ mod tests {
     lazy_static! {
         static ref EXAMPLE_EPISODE: Episode = 
             Episode {
-                id: 1,
                 name: "test".to_string(),
                 season: 1,
                 episode: 2,
@@ -104,10 +68,14 @@ mod tests {
 
     #[test]
     fn unique_id_to_string() {
-        let uid = UniqueId { show: "hi.bye-name".to_string(), season: 4, episode: 10 };
+        let uid = UniqueId { show: Name("hi.bye-name".to_string()), season: 4, episode: 10 };
         println!("{}", uid.to_string());
-        let uid = UniqueId { show: "Modern Family".to_string(), season: 4, episode: 10 };
-        println!("{}", uid.to_string());
+        let uid = UniqueId { show: Name("Modern Family".to_string()), season: 4, episode: 10 };
+        let uid_str = uid.to_string();
+        println!("{}", uid_str);
+        use std::str::FromStr;
+        let uid_round_tripped = UniqueId::from_str(&uid_str).unwrap();
+        println!("eq? {}", uid_round_tripped == uid);
         assert!(false)
     }
 }

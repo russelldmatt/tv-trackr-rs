@@ -25,7 +25,6 @@ fn handle_shows(_: &mut Request) -> IronResult<Response> {
             episodes: {
                 vec![
                     Episode { 
-                        id: 1,
                         name:"Game Day".to_string(),
                         season: 2,
                         episode: 10,
@@ -33,7 +32,6 @@ fn handle_shows(_: &mut Request) -> IronResult<Response> {
                         seen_class: "seen".to_string()
                     },
                     Episode { 
-                        id: 2,
                         name:"Million Bucks in a Bag".to_string(),
                         season: 2,
                         episode: 9,

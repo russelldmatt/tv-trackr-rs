@@ -20,7 +20,8 @@ extern crate itertools;
 
 use iron::prelude::*;
 
-mod show;
+pub mod show;
+mod unique_id;
 mod hello_world;
 mod log_file;
 mod counter;
@@ -111,6 +112,16 @@ mod tests {
         println!("{:?}", parsed);
         println!("{}", parsed.to_naive_date().unwrap());
         assert!(false);
+    }
+
+    #[test]
+    fn module_stuff() {
+        use unique_id;
+        use std::str::FromStr;
+        let _uid = unique_id::UniqueId::from_str("show-name.6.2");
+        use show;
+        let _uid = show::UniqueId::from_str("show-name.6.2");
+        assert!(true)
     }
 }
 
