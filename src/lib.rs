@@ -1,6 +1,7 @@
 #![feature(conservative_impl_trait)]
 #![feature(proc_macro)]
 #![feature(field_init_shorthand)]
+#![feature(try_from)]
 
 extern crate iron;
 extern crate persistent;
@@ -21,6 +22,7 @@ extern crate itertools;
 use iron::prelude::*;
 
 pub mod show;
+pub mod scraped_show;
 mod unique_id;
 pub mod hello_world;
 pub mod log_file;

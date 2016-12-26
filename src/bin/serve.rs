@@ -11,7 +11,7 @@ fn main() {
     let router = router!(
         hello_world:  get "/"         => hello_world::handler(),
         log_file:     get "/log-file" => log_file::handler(),
-        count:        get  "/count"   => counter::handler(),
+        count:        get "/count"    => counter::handler(),
         hi:           get "/hi/:name" => hi::handler(),
         template:     get "/template" => template::handler(),
         test_post:    post "/test-post" => test_post_handler(),

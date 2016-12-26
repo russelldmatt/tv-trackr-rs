@@ -31,21 +31,6 @@ pub struct Episode {
     pub aire_date: NaiveDate,
 }
 
-use std;
-pub fn load(file: String) -> Result<(), std::io::Error> {
-    use std::io::prelude::*;
-    use std::io::BufReader;
-    use std::fs::File;
-
-    let f = try!(File::open(file));
-    let reader = BufReader::new(f);
-
-    for (n, line) in reader.lines().enumerate() {
-        println!("Line {}: {}", n, line?);
-    };
-    Ok(())
-}
-
 #[cfg(test)]
 mod tests { 
     use super::*;
