@@ -22,14 +22,14 @@ use iron::prelude::*;
 
 pub mod show;
 mod unique_id;
-mod hello_world;
-mod log_file;
-mod counter;
-mod hi;
-mod template;
+pub mod hello_world;
+pub mod log_file;
+pub mod counter;
+pub mod hi;
+pub mod template;
 
 use iron::middleware::Handler;
-fn test_post_handler() -> impl Handler {
+pub fn test_post_handler() -> impl Handler {
     use iron::typemap::Key;
     use persistent::{State};
 
@@ -62,30 +62,6 @@ fn test_post_handler() -> impl Handler {
     let mut chain = Chain::new(test_post);
     chain.link(State::<Counter>::both(0));
     chain
-}
-
-fn main() {
-    let router = router!(
-        hello_world:  get "/"         => hello_world::handler(),
-        log_file:     get "/log-file" => log_file::handler(),
-        count:        get  "/count"   => counter::handler(),
-        hi:           get "/hi/:name" => hi::handler(),
-        template:     get "/template" => template::handler(),
-        test_post:    post "/test-post" => test_post_handler(),
-    );
-
-    use mount::Mount;
-    use staticfile::Static;
-    use std::path::Path;
-    let mut mount = Mount::new();
-    mount
-        .mount("/", router)
-        .mount("/static/", Static::new(Path::new("/Users/mrussell/code/rust/tv-trackr/static")))
-        ;
-
-    let sock_addr = "localhost:3000";
-    let _server = Iron::new(mount).http(sock_addr).unwrap();
-    println!("serving on {}...", sock_addr);
 }
 
 #[cfg(test)]

@@ -21,7 +21,7 @@ fn handle_shows(_: &mut Request) -> IronResult<Response> {
     let mut response = Response::new();
     let ballers = 
         Show {
-            name: "Ballers".to_string(),
+            name: Name::from("Ballers"),
             episodes: {
                 vec![
                     Episode { 
@@ -29,14 +29,12 @@ fn handle_shows(_: &mut Request) -> IronResult<Response> {
                         season: 2,
                         episode: 10,
                         aire_date: date_of_string("September 25, 2016"),
-                        seen_class: "seen".to_string()
                     },
                     Episode { 
                         name:"Million Bucks in a Bag".to_string(),
                         season: 2,
                         episode: 9,
                         aire_date: date_of_string("September 25, 2016"),
-                        seen_class: "seen".to_string()
                     },
                 ]
             }
