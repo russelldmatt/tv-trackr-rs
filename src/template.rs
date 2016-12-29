@@ -5,47 +5,29 @@ use iron::middleware::Handler;
 use handlebars_iron::{HandlebarsEngine, DirectorySource, Template};
 use serde_json;
 
-fn handle_shows(_: &mut Request) -> IronResult<Response> {
+use iron::typemap::Key;
+use persistent::{Read};
+
+use show::*;
+
+#[derive(Copy, Clone)]
+pub struct Shows;
+impl Key for Shows { type Value = Vec<Show>; }
+
+
+fn handle_shows(req: &mut Request) -> IronResult<Response> {
     println!("shows");
-    use show::*;
-    use chrono;
-    
-    fn date_of_string(date_str: &str) -> chrono::naive::date::NaiveDate {
-        use chrono::format;
-        let mut parsed = format::parsed::Parsed::new();
-        let format_string = format::strftime::StrftimeItems::new("%B %d, %Y");
-        format::parse(&mut parsed, date_str, format_string).unwrap();
-        parsed.to_naive_date().unwrap()
-    }
 
     let mut response = Response::new();
-    let ballers = 
-        Show {
-            name: Name::from("Ballers"),
-            episodes: {
-                vec![
-                    Episode { 
-                        name:"Game Day".to_string(),
-                        season: 2,
-                        episode: 10,
-                        aire_date: date_of_string("September 25, 2016"),
-                    },
-                    Episode { 
-                        name:"Million Bucks in a Bag".to_string(),
-                        season: 2,
-                        episode: 9,
-                        aire_date: date_of_string("September 25, 2016"),
-                    },
-                ]
-            }
-        };
+    let shows = req.get::<Read<Shows>>().unwrap();
+    let shows = shows.as_ref();
     
-    #[derive(Serialize, Deserialize, Debug)]
-    struct Data { 
-        shows: Vec<Show>,
+    #[derive(Serialize, Debug)]
+    struct Data<'a> { 
+        shows: &'a Vec<Show>,
     }
 
-    let data = Data { shows: vec![ballers] };
+    let data = Data { shows };
     response.set_mut(Template::new("episodes", data)).set_mut(status::Ok);
     println!("{}", response);
     Ok(response)
@@ -56,7 +38,8 @@ pub fn handler() -> impl Handler {
     // https://github.com/sunng87/handlebars-rust#extensible-helper-system
     use handlebars::{Helper, Handlebars, Context, RenderContext, RenderError};
     use chrono;
-    fn date_helper (_: &Context, h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
+    fn date_helper (_: &Context, h: &Helper, _: &Handlebars, rc: &mut RenderContext)
+                    -> Result<(), RenderError> {
         // just for example, add error check for unwrap
         let param = h.param(0).unwrap().value();
         let date: chrono::naive::date::NaiveDate = 
@@ -76,7 +59,35 @@ pub fn handler() -> impl Handler {
     if let Err(r) = hbse.reload() {
         panic!("{}", r);
     }
+
+    // CR mrussell: obviously change...
+    let show_files = [
+        "ballers.json",
+        "broad-city.json",
+        "brooklyn-99.json",
+        "game-of-thrones.json",
+        "its-always-sunny-in-philadelphia.json",
+        "last-man-on-earth.json",
+        "modern-family.json",
+        "narcos.json",
+        "south-park.json",
+        "the-league.json",
+        "the-night-of.json",
+        "westworld.json",
+        ];
+
+    let shows: Vec<Show> = show_files.iter().map(|basename| {
+        let file = format!("/Users/mrussell/code/tv-trackr/show-episodes/{}", basename);
+        use scraped_show;
+        let scraped_show: scraped_show::S = scraped_show::load(&file)
+            .map_err(|e| format!("Could not load scraped show {}, err: {}", file, e))
+            .unwrap();
+        use std::convert::TryFrom;
+        Show::try_from(scraped_show).unwrap()
+    }).collect();
+
     let mut chain = Chain::new(handle_shows);
+    chain.link_before(Read::<Shows>::one(shows));
     chain.link_after(hbse);
     chain
 }

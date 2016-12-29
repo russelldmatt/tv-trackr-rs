@@ -30,7 +30,6 @@ impl TryFrom<E> for Episode {
     type Err = ParseEpisodeError;
 
     fn try_from(e: E) -> Result<Self, Self::Err> {
-        println!("episode: {}", e.episode);
         let mut episode = e.episode.split(", ");
         use std::str::Split;
         let parse_season_or_episode = |name: &mut Split<&str>, prefix: &str| {
@@ -89,11 +88,11 @@ impl TryFrom<S> for Show {
     }
 }
 
-pub fn load(file: String) -> Result<S, std::io::Error> {
+pub fn load(file: &String) -> Result<S, std::io::Error> {
     use serde_json;
 
     use std::path::Path;
-    let name = Path::new(&file).file_stem().unwrap().to_str().unwrap().to_string();
+    let name = Path::new(file).file_stem().unwrap().to_str().unwrap().to_string();
 
     let f = try!(File::open(file));
     let reader = BufReader::new(f);
