@@ -7,6 +7,14 @@ use show;
 
 pub struct ShowsSeen(pub HashSet<show::UniqueId>);
 
+use std::ops::Deref;
+impl Deref for ShowsSeen {
+    type Target = HashSet<show::UniqueId>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 pub fn load(file: &str) -> Result<ShowsSeen, io::Error> {
     let f = try!(File::open(file));
     let reader = BufReader::new(f);

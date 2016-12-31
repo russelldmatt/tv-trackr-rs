@@ -53,13 +53,13 @@ pub fn seen_show_handler() -> impl Handler {
 
             use std::str::FromStr;
             let unique_id = 
-                unique_id::UniqueId::from_str(&payload)
+                show::UniqueId::from_str(&payload)
                 .expect("Could not parse unique_id from payload");
             println!("unique id: {:?}", unique_id);
 
             let should_add = {
                 let seen_shows = seen_shows.read().unwrap();
-                let exists = seen_shows.0.contains(&unique_id);
+                let exists = seen_shows.contains(&unique_id);
                 println!("is this unique id already in seen shows? {}", exists);
                 !exists
             };
@@ -67,7 +67,7 @@ pub fn seen_show_handler() -> impl Handler {
                 println!("Adding now");
                 let mut seen_shows = seen_shows.write().unwrap();
                 println!("Got lock");
-                let _ = (*seen_shows).0.insert(unique_id);
+                let _: bool = (*seen_shows).0.insert(unique_id);
                 ()
             };
         }

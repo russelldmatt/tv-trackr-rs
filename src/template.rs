@@ -39,7 +39,7 @@ fn handle_shows(req: &mut Request) -> IronResult<Response> {
 
     #[derive(Serialize, Debug)]
     pub struct Show {
-        pub name: Name,
+        pub name: String,
         pub episodes: Vec<EpisodeWithId>,
     }
 
@@ -76,9 +76,22 @@ fn handle_shows(req: &mut Request) -> IronResult<Response> {
                  }
             })
             .collect();
-        Show { name: show.name.clone(), 
-               episodes
+        
+
+        fn capitalize(s: &str) -> String {
+            let mut c = s.chars();
+            match c.next() {
+                None => String::new(),
+                Some(f) => f.to_uppercase().chain(c).collect(),
+            }
         }
+
+        use itertools::Itertools;
+        let name = show.name.split("-").into_iter().map(capitalize)
+            .intersperse(" ".to_string())
+            .collect();
+
+        Show { name, episodes }
     }).collect();
     let data = Data { shows: shows };
 

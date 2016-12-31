@@ -92,23 +92,11 @@ impl TryFrom<S> for Show {
     }
 }
 
-fn capitalize(s: &str) -> String {
-    let mut c = s.chars();
-    match c.next() {
-        None => String::new(),
-        Some(f) => f.to_uppercase().chain(c).collect(),
-    }
-}
-
 pub fn load(file: &str) -> Result<S, std::io::Error> {
     use serde_json;
 
     use std::path::Path;
     let name = Path::new(file).file_stem().unwrap().to_str().unwrap().to_string();
-    use itertools::Itertools;
-    let name = name.split("-").into_iter().map(capitalize)
-        .intersperse(" ".to_string())
-        .collect();
     let f = try!(File::open(file));
     let reader = BufReader::new(f);
 

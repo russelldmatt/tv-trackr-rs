@@ -41,7 +41,7 @@ fn main() {
     let seen_shows =
         viewer_history::load("/Users/mrussell/code/rust/tv-trackr/data/seen_shows.txt")
         .expect("Could not load seen shows");
-    println!("#seen shows: {}", seen_shows.0.len());
+    println!("#seen shows: {}", seen_shows.len());
 
     let router = router!(
         hello_world:  get "/"         => hello_world::handler(),

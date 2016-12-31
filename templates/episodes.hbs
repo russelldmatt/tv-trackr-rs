@@ -26,7 +26,8 @@
            data: id,
            dataType: "json",
            success: function (result) {
-	       resultDiv.html(result)
+	       resultDiv.html(result);
+               location.reload();
            },
            error: function (xhr, ajaxOptions, thrownError) {
 	       alert(xhr.status);
@@ -44,7 +45,7 @@
       <div style="white-space:nowrap">
 	{{#each show.episodes as |e|}}
           <div style="display: inline-block;">
-            <div id="hidden_{{ e.unique_id }}_seen" class="hidden-box" onclick="SeenId('{{ e.unique_id }}')" style="display: none;">Hidden!</div>
+            <div id="hidden_{{ e.unique_id }}_seen" class="hidden-box" onclick="SeenId('{{ e.unique_id }}')" style="display: none;">Mark as seen</div>
 	    <div class="box {{ e.seen_class }}" onclick="ClickedId('{{ e.unique_id }}')">
 	      Season {{ e.episode.season }}, Episode {{ e.episode.episode }}<br />
 	      <span class="aire_date">{{ date e.episode.aire_date }}</span><br />

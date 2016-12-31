@@ -6,6 +6,14 @@ pub use unique_id::UniqueId;
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Hash, Clone)]
 pub struct Name(pub String);
 
+use std::ops::Deref;
+impl Deref for Name {
+    type Target = String;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 impl fmt::Display for Name {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)
