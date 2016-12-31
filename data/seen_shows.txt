@@ -910,13 +910,6 @@ the-night-of_1_4
 the-night-of_1_3
 the-night-of_1_2
 the-night-of_1_1
-westworld_1_10
-westworld_1_9
-westworld_1_8
-westworld_1_7
-westworld_1_6
-westworld_1_5
-westworld_1_4
 westworld_1_3
 westworld_1_2
 westworld_1_1

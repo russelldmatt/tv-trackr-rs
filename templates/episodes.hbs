@@ -28,6 +28,7 @@
            success: function (result) {
 	       resultDiv.html(result);
                location.reload();
+               window.location.hash = '#' + id;
            },
            error: function (xhr, ajaxOptions, thrownError) {
 	       alert(xhr.status);
@@ -44,7 +45,7 @@
       <h3>{{ name }}</h3>
       <div style="white-space:nowrap">
 	{{#each show.episodes as |e|}}
-          <div style="display: inline-block;">
+          <div id="{{ e.unique_id }}" style="display: inline-block;">
             <div id="hidden_{{ e.unique_id }}_seen" class="hidden-box" onclick="SeenId('{{ e.unique_id }}')" style="display: none;">Mark as seen</div>
 	    <div class="box {{ e.seen_class }}" onclick="ClickedId('{{ e.unique_id }}')">
 	      Season {{ e.episode.season }}, Episode {{ e.episode.episode }}<br />
