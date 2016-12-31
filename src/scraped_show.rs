@@ -100,7 +100,7 @@ fn capitalize(s: &str) -> String {
     }
 }
 
-pub fn load(file: &String) -> Result<S, std::io::Error> {
+pub fn load(file: &str) -> Result<S, std::io::Error> {
     use serde_json;
 
     use std::path::Path;

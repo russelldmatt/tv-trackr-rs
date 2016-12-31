@@ -42,19 +42,19 @@
   <div id="response_from_server"></div>
   {{#each shows as |show|}}
     <div>
-	    <h3>{{ name }}</h3>
-	    <div style="white-space:nowrap">
-	      {{#each show.episodes as |episode|}}
-                <div id="hidden_{{ episode.unique_id }}" class="hidden-box" onclick="ClickedId('{{ episode.unique_id }}')" style="display: none;">
-                  Hidden!
-                </div>
-		<div class="box {{ seen_class }}" onclick="ClickedId('{{ episode.unique_id }}')">
-		  Season {{ episode.episode.season }}, Episode {{ episode.episode.episode }}<br />
-		  <span class="aire_date">{{ date episode.episode.aire_date }}</span><br />
-		  {{ episode.episode.name }}
-		</div>
-              {{/each}}
-	    </div>
+      <h3>{{ name }}</h3>
+      <div style="white-space:nowrap">
+	{{#each show.episodes as |e|}}
+          <div id="hidden_{{ e.unique_id }}" class="hidden-box" onclick="ClickedId('{{ e.unique_id }}')" style="display: none;">
+            Hidden!
+          </div>
+	  <div class="box {{ e.seen_class }}" onclick="ClickedId('{{ e.unique_id }}')">
+	    Season {{ e.episode.season }}, Episode {{ e.episode.episode }}<br />
+	    <span class="aire_date">{{ date e.episode.aire_date }}</span><br />
+	    {{ e.episode.name }}
 	  </div>
+        {{/each}}
+      </div>
+    </div>
   {{/each}}
 </body>

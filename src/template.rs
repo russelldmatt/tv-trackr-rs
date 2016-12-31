@@ -12,10 +12,14 @@ use persistent::{Read};
 
 use show;
 use show::*;
+use viewer_history;
 
 #[derive(Copy, Clone)]
 pub struct Shows;
 impl Key for Shows { type Value = Vec<Show>; }
+
+pub struct ViewerHistory;
+impl Key for ViewerHistory { type Value = viewer_history::ShowsSeen; }
 
 fn handle_shows(req: &mut Request) -> IronResult<Response> {
     println!("shows");
@@ -26,10 +30,14 @@ fn handle_shows(req: &mut Request) -> IronResult<Response> {
     let shows = req.get::<Read<Shows>>().unwrap();
     let shows = shows.as_ref();
 
+    let seen_shows = req.get::<Read<ViewerHistory>>().unwrap();
+    let seen_shows = seen_shows.as_ref();
+
     #[derive(Serialize, Debug)]    
     pub struct EpisodeWithId {
         unique_id: String,
-        episode: Episode 
+        episode: Episode,
+        seen_class: String,
     }
 
     #[derive(Serialize, Debug)]
@@ -42,7 +50,11 @@ fn handle_shows(req: &mut Request) -> IronResult<Response> {
     struct Data { 
         shows: Vec<Show>,
     }
-
+    
+    let today = {
+        use chrono::*;
+        Local::today().naive_local()
+    };
     let shows = shows.into_iter().map(|show: &show::Show| { 
         let mut episodes: Vec<(UniqueId, Episode)> =
             show.episodes.iter()
@@ -51,10 +63,21 @@ fn handle_shows(req: &mut Request) -> IronResult<Response> {
         episodes.sort_by(|fst, snd| fst.0.cmp(&snd.0));
         episodes.reverse();
         let episodes = episodes.into_iter()
-            .map(|(unique_id, episode)| 
-                 EpisodeWithId { unique_id: unique_id.to_string(), 
-                                 episode 
-                 })
+            .map(|(unique_id, episode)| {
+                let seen_class = 
+                    if seen_shows.0.contains(&unique_id) {
+                        "seen"
+                    } else if episode.aire_date < today {
+                        "new"
+                    } else {
+                        "future"
+                    };
+                 EpisodeWithId { 
+                     unique_id: unique_id.to_string(), 
+                     episode, 
+                     seen_class: seen_class.to_string(),
+                 }
+            })
             .collect();
         Show { name: show.name.clone(), 
                episodes
@@ -127,8 +150,14 @@ pub fn handler() -> impl Handler {
         Show::try_from(scraped_show).unwrap()
     }).collect();
 
+    let seen_shows =
+        viewer_history::load("/Users/mrussell/code/rust/tv-trackr/data/seen_shows.txt")
+        .expect("Could not load seen shows");
+    println!("#seen shows: {}", seen_shows.0.len());
+    
     let mut chain = Chain::new(handle_shows);
     chain.link_before(Read::<Shows>::one(shows));
+    chain.link_before(Read::<ViewerHistory>::one(seen_shows));
     chain.link_after(hbse);
     chain
 }

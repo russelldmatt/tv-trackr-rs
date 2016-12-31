@@ -24,6 +24,7 @@ use iron::prelude::*;
 
 pub mod show;
 pub mod scraped_show;
+mod viewer_history;
 mod unique_id;
 pub mod hello_world;
 pub mod log_file;
