@@ -21,3 +21,7 @@ pub fn load(file: &str) -> Result<ShowsSeen, io::Error> {
     Ok(ShowsSeen(shows))
 }
 
+use iron::typemap::Key;
+pub struct ViewerHistory;
+impl Key for ViewerHistory { type Value = ShowsSeen; }
+

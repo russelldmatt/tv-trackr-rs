@@ -7,9 +7,7 @@
 
   <script type="text/javascript">
    ClickedId = function(id) {
-       var resultDiv = $("#response_from_server");
-       
-       var hidden_id = "#hidden_" + id
+       var hidden_id = "#hidden_" + id + "_seen"
        console.log("hidden id: " + hidden_id);
        var hidden_div = $(hidden_id)
        console.log("hidden_div.html: " + hidden_div.html());
@@ -18,14 +16,14 @@
        } else {
            hidden_div.css("display", "none")
        }
-
-       /* console.log("hidden_div.style: " + hidden_div.style());
-        * hidden_div.style.display = "inline";
-        */
+   };
+   SeenId = function(id) {
+       var resultDiv = $("#response_from_server");
+       console.log("now I've seen: " + id);
        $.ajax({
-           url: "http://localhost:3000/test-post",
+           url: "http://localhost:3000/seen-show",
            type: "POST",
-           data: { id: id },
+           data: id,
            dataType: "json",
            success: function (result) {
 	       resultDiv.html(result)
@@ -45,14 +43,14 @@
       <h3>{{ name }}</h3>
       <div style="white-space:nowrap">
 	{{#each show.episodes as |e|}}
-          <div id="hidden_{{ e.unique_id }}" class="hidden-box" onclick="ClickedId('{{ e.unique_id }}')" style="display: none;">
-            Hidden!
+          <div style="display: inline-block;">
+            <div id="hidden_{{ e.unique_id }}_seen" class="hidden-box" onclick="SeenId('{{ e.unique_id }}')" style="display: none;">Hidden!</div>
+	    <div class="box {{ e.seen_class }}" onclick="ClickedId('{{ e.unique_id }}')">
+	      Season {{ e.episode.season }}, Episode {{ e.episode.episode }}<br />
+	      <span class="aire_date">{{ date e.episode.aire_date }}</span><br />
+	      {{ e.episode.name }}
+	    </div>
           </div>
-	  <div class="box {{ e.seen_class }}" onclick="ClickedId('{{ e.unique_id }}')">
-	    Season {{ e.episode.season }}, Episode {{ e.episode.episode }}<br />
-	    <span class="aire_date">{{ date e.episode.aire_date }}</span><br />
-	    {{ e.episode.name }}
-	  </div>
         {{/each}}
       </div>
     </div>

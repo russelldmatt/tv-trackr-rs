@@ -1,4 +1,3 @@
-use time;
 use std::time::Instant;
 use iron::prelude::*;
 use iron::status;
@@ -8,7 +7,7 @@ use handlebars_iron::{HandlebarsEngine, DirectorySource, Template};
 use serde_json;
 
 use iron::typemap::Key;
-use persistent::{Read};
+use persistent::{Read, State};
 
 use show;
 use show::*;
@@ -17,9 +16,6 @@ use viewer_history;
 #[derive(Copy, Clone)]
 pub struct Shows;
 impl Key for Shows { type Value = Vec<Show>; }
-
-pub struct ViewerHistory;
-impl Key for ViewerHistory { type Value = viewer_history::ShowsSeen; }
 
 fn handle_shows(req: &mut Request) -> IronResult<Response> {
     println!("shows");
@@ -30,8 +26,9 @@ fn handle_shows(req: &mut Request) -> IronResult<Response> {
     let shows = req.get::<Read<Shows>>().unwrap();
     let shows = shows.as_ref();
 
-    let seen_shows = req.get::<Read<ViewerHistory>>().unwrap();
+    let seen_shows = req.get::<State<viewer_history::ViewerHistory>>().unwrap();
     let seen_shows = seen_shows.as_ref();
+    let seen_shows = seen_shows.read().unwrap();
 
     #[derive(Serialize, Debug)]    
     pub struct EpisodeWithId {
@@ -91,7 +88,7 @@ fn handle_shows(req: &mut Request) -> IronResult<Response> {
     Ok(response)
 }
 
-pub fn handler() -> impl Handler {
+pub fn handler(shows: Vec<Show>) -> impl Handler {
     // helpers
     // https://github.com/sunng87/handlebars-rust#extensible-helper-system
     use handlebars;
@@ -99,10 +96,8 @@ pub fn handler() -> impl Handler {
     use chrono;
     fn date_helper (_: &Context, h: &Helper, _: &Handlebars, rc: &mut RenderContext)
                     -> Result<(), RenderError> {
-        println!("{}", time::strftime("%Y-%m-%d: %H:%M:%S.%f", &time::now()).expect("Bad time format string"));
         // just for example, add error check for unwrap
         let param = h.param(0).expect("No parameter given").value();
-        println!("param is: {:?}", param);
         let date: chrono::naive::date::NaiveDate = 
             serde_json::value::from_value(param.clone())
             .expect("Cannot create value from param");
@@ -124,40 +119,8 @@ pub fn handler() -> impl Handler {
         panic!("{}", r);
     }
 
-    // CR mrussell: obviously change...
-    let show_files = [
-        "ballers.json",
-        "broad-city.json",
-        "brooklyn-99.json",
-        "game-of-thrones.json",
-        "its-always-sunny-in-philadelphia.json",
-        "last-man-on-earth.json",
-        "modern-family.json",
-        "narcos.json",
-        "south-park.json",
-        "the-league.json",
-        "the-night-of.json",
-        "westworld.json",
-        ];
-
-    let shows: Vec<Show> = show_files.iter().map(|basename| {
-        let file = format!("/Users/mrussell/code/tv-trackr/show-episodes/{}", basename);
-        use scraped_show;
-        let scraped_show: scraped_show::S = scraped_show::load(&file)
-            .map_err(|e| format!("Could not load scraped show {}, err: {}", file, e))
-            .unwrap();
-        use std::convert::TryFrom;
-        Show::try_from(scraped_show).unwrap()
-    }).collect();
-
-    let seen_shows =
-        viewer_history::load("/Users/mrussell/code/rust/tv-trackr/data/seen_shows.txt")
-        .expect("Could not load seen shows");
-    println!("#seen shows: {}", seen_shows.0.len());
-    
     let mut chain = Chain::new(handle_shows);
     chain.link_before(Read::<Shows>::one(shows));
-    chain.link_before(Read::<ViewerHistory>::one(seen_shows));
     chain.link_after(hbse);
     chain
 }
