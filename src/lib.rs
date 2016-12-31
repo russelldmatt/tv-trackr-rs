@@ -2,6 +2,7 @@
 #![feature(proc_macro)]
 #![feature(field_init_shorthand)]
 #![feature(try_from)]
+#![feature(ordering_chaining)]
 
 extern crate iron;
 extern crate persistent;

@@ -2,6 +2,7 @@ use std;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::fs::File;
+use std::collections::HashMap;
 use show::*;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -77,12 +78,15 @@ impl TryFrom<S> for Show {
     type Err = ParseEpisodeError;
 
     fn try_from(s: S) -> Result<Self, Self::Err> {
+        let show_name = Name::from(&s.name[..]);
         let eps: Result<Vec<Episode>, Self::Err> = 
             s.episodes.into_iter().map(|e| Episode::try_from(e)).collect();
+        let episodes: HashMap<UniqueId, Episode> = 
+            eps?.into_iter().map(|ep| (ep.unique_id(show_name.clone()), ep)).collect();
         Ok (
             Show {
-                name: Name::from(&s.name[..]),
-                episodes: eps?,
+                name: show_name,
+                episodes
             }
         )
     }

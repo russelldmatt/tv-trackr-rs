@@ -1,16 +1,31 @@
 use show;
 use std::str::FromStr;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Hash, Serialize, Deserialize, Clone)]
 pub struct UniqueId {
     pub show: show::Name,
     pub season: i32,
     pub episode: i32,
 }
 
+use std::cmp::Ordering;
+impl Ord for UniqueId {
+    fn cmp(&self, other: &Self) -> Ordering {
+        Ordering::Equal
+            .then(self.show.cmp(&other.show))
+            .then(self.season.cmp(&other.season))
+            .then(self.episode.cmp(&other.episode))
+    }
+}
+impl UniqueId {
+    fn delim() -> char {
+        '_'
+    }
+}
+
 impl ToString for UniqueId {
     fn to_string(&self) -> String {
-        format!("{}.{}.{}", self.show, self.season, self.episode)
+        format!("{}{}{}{}{}", self.show, Self::delim(), self.season, Self::delim(), self.episode)
     }
 }
 
@@ -29,7 +44,7 @@ impl FromStr for UniqueId {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         use self::ParseUniqueIdError::*;
-        let mut rsplit = s.rsplit(".");
+        let mut rsplit = s.rsplit(Self::delim());
         let episode: i32 =
             rsplit.next().ok_or(NoEpisode)?.parse().map_err(CannotParseEpisode)?;
         let season: i32 =
@@ -39,7 +54,10 @@ impl FromStr for UniqueId {
             Err(NoShow)
         } else {
             use itertools::Itertools;
-            let show = show::Name(show_parts.into_iter().rev().intersperse(".").collect());
+            let show = show::Name(show_parts.into_iter().rev()
+                                  .intersperse(&Self::delim().to_string())
+                                  .collect()
+            );
             Ok(UniqueId { show, season, episode })
         }
     }

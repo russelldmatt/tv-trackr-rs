@@ -1,8 +1,9 @@
 use chrono::naive::date::NaiveDate;
 use std::fmt;
+use std::collections::HashMap;
 pub use unique_id::UniqueId; 
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Hash, Clone)]
 pub struct Name(pub String);
 
 impl fmt::Display for Name {
@@ -17,18 +18,31 @@ impl<'a> From<&'a str> for Name {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Show {
-    pub name: Name,
-    pub episodes: Vec<Episode>,
+use std::cmp::Ordering;
+impl Ord for Name {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.0.cmp(&other.0)
+    }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Show {
+    pub name: Name,
+    pub episodes: HashMap<UniqueId, Episode>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Episode {
     pub name: String,
     pub season: i32,
     pub episode: i32,
     pub aire_date: NaiveDate,
+}
+
+impl Episode {
+    pub fn unique_id(&self, show: Name) -> UniqueId {
+        UniqueId { show, season: self.season, episode: self.episode }
+    }
 }
 
 #[cfg(test)]
