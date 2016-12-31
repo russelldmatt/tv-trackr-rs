@@ -57,14 +57,14 @@ impl TryFrom<E> for Episode {
         chrono::format::parse(&mut parsed, &e.aire_date, format_string).unwrap();
         let aire_date = parsed.to_naive_date().unwrap();
         
-        Ok (
+        let episode = 
             Episode {
                 name: e.name,
                 season: season,
                 episode: episode,
                 aire_date,
-            }
-        )
+            };
+        Ok (episode)
     }
 }
 
@@ -117,10 +117,7 @@ pub fn load(file: &String) -> Result<S, std::io::Error> {
         Ok(serde_json::from_str(&line).unwrap())
     }).collect();
     
-    Ok (
-        S { name,
-            episodes: eps?
-        }
-    )
+    let episodes = eps?;
+    Ok (S { name, episodes })
 }
 

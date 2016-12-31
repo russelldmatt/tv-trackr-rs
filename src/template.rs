@@ -71,6 +71,7 @@ fn handle_shows(req: &mut Request) -> IronResult<Response> {
 pub fn handler() -> impl Handler {
     // helpers
     // https://github.com/sunng87/handlebars-rust#extensible-helper-system
+    use handlebars;
     use handlebars::{Helper, Handlebars, Context, RenderContext, RenderError};
     use chrono;
     fn date_helper (_: &Context, h: &Helper, _: &Handlebars, rc: &mut RenderContext)
@@ -89,6 +90,8 @@ pub fn handler() -> impl Handler {
 
     let mut hb = Handlebars::new();
     hb.register_helper("date", Box::new(date_helper));
+    // My episode names are already escaped due to the fact that they're scraped from html
+    hb.register_escape_fn(handlebars::no_escape);
     let mut hbse = HandlebarsEngine::from(hb);
 
     // CR mrussell: configurable tempate dir
