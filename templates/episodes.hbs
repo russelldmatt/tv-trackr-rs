@@ -2,20 +2,35 @@
   <!-- /Users/mrussell/code/rust/tv-trackr/templates/ -->
   <link href="/static/head.html" rel="import" />
   <link href="/static/styles.css" type="text/css" rel="stylesheet" />
-
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-
   <script type="text/javascript">
-   ClickedId = function(id) {
-       var hidden_id = "#hidden_" + id + "_seen"
-       console.log("hidden id: " + hidden_id);
-       var hidden_div = $(hidden_id)
-       console.log("hidden_div.html: " + hidden_div.html());
+   currently_unhidden_id = null;
+   
+   ToHidden = function(id) {
+       return "#hidden_" + id + "_seen"
+   }
+   
+   ToggleHidden = function(id) {
+       console.log("Toggling " + id);
+       var hidden_div = $(id)
        if (hidden_div.css("display") == "none") {
-           hidden_div.css("display", "")
+           hidden_div.css("display", "");
+           currently_unhidden_id = id;
        } else {
            hidden_div.css("display", "none")
+           currently_unhidden_id = null;
        }
+   };
+       
+   ClickedId = function(id) {
+       var id = ToHidden(id);
+
+       if (currently_unhidden_id && !(currently_unhidden_id == id)) {
+           console.log("Hiding " + currently_unhidden_id);
+           ToggleHidden(currently_unhidden_id)
+       }
+       
+       ToggleHidden(id)
    };
    SeenId = function(id) {
        var resultDiv = $("#response_from_server");
@@ -25,10 +40,15 @@
            type: "POST",
            data: id,
            dataType: "json",
-           success: function (result) {
-	       resultDiv.html(result);
-               location.reload();
-               window.location.hash = '#' + id;
+           success: function (response) {
+               console.log("response: " + response);
+	       resultDiv.html(response);
+               if (response) {
+                   window.location.hash = '#' + id;
+                   window.location.reload(true);
+               } else {
+                   ToggleHidden(ToHidden(id));
+               }
            },
            error: function (xhr, ajaxOptions, thrownError) {
 	       alert(xhr.status);
@@ -38,6 +58,7 @@
    };
   </script>
 </head>
+
 <body>
   <div id="response_from_server"></div>
   {{#each shows as |show|}}
@@ -57,4 +78,13 @@
       </div>
     </div>
   {{/each}}
+
+  <script>
+   <!-- This is so that after reload, the page is at the anchor. -->
+   $( document ).ready(function() {
+       if (window.location.hash) {
+           window.location.href = window.location.hash;
+       }
+   })
+  </script>
 </body>

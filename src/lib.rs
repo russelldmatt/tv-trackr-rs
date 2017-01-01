@@ -47,6 +47,7 @@ pub fn seen_show_handler() -> impl Handler {
         use std::io::Read;
         request.body.read_to_string(&mut payload).unwrap();
         println!("payload: {}", payload);
+        let newly_added = 
         { 
             let arc = request.get_mut::<State<viewer_history::ViewerHistory>>().unwrap();
             let seen_shows = arc.as_ref();
@@ -70,7 +71,8 @@ pub fn seen_show_handler() -> impl Handler {
                 let _: bool = (*seen_shows).0.insert(unique_id);
                 ()
             };
-        }
+            should_add
+        };
         // let request: Greeting = json::decode(&payload).unwrap();
         // let greeting = Greeting { msg: request.msg };
         // let payload = json::encode(&greeting).unwrap();
@@ -81,8 +83,7 @@ pub fn seen_show_handler() -> impl Handler {
         *count += 1;
 
         use serde_json;
-        let json_response = 
-            serde_json::value::Value::String(format!("successfully received #{}", *count));
+        let json_response = serde_json::value::Value::Bool(newly_added);
         let response = format!("{}", json_response);
         Ok(Response::with((status::Ok, response)))
     }
