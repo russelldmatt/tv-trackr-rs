@@ -39,7 +39,7 @@ fn main() {
     }).collect();
 
     let seen_shows =
-        viewer_history::load("/Users/mrussell/code/rust/tv-trackr/data/seen_shows.txt")
+        viewer_history::ShowsSeen::load("/Users/mrussell/code/rust/tv-trackr/data/seen_shows.txt")
         .expect("Could not load seen shows");
     println!("#seen shows: {}", seen_shows.len());
 

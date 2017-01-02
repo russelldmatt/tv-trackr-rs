@@ -46,16 +46,6 @@ pub fn tv_guide_url(search_show_name: String) -> Result<Url> {
 }
 
 fn main() {
-    let search = env::args().nth(1).unwrap();
-    // println!("search: {}", search);
+    let search = env::args().nth(1).expect("Expected an argument (tv show)");
     println!("url: {:?}", tv_guide_url(search));
-    
-    // let output = Command::new("/Users/mrussell/code/rust/tv-trackr/get-tv-guide-url.sh").arg(search).output().unwrap();
-    // println!("status: {}", output.status);
-    // println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
-    // println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
-
-    // assert!(output.status.success());
-
-    // println!("another exe?")
 }

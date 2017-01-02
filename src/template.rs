@@ -62,7 +62,7 @@ fn handle_shows(req: &mut Request) -> IronResult<Response> {
         let episodes = episodes.into_iter()
             .map(|(unique_id, episode)| {
                 let seen_class = 
-                    if seen_shows.0.contains(&unique_id) {
+                    if seen_shows.contains(&unique_id) {
                         "seen"
                     } else if episode.aire_date < today {
                         "new"

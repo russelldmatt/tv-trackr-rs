@@ -85,6 +85,14 @@
        if (window.location.hash) {
            window.location.href = window.location.hash;
        }
+       var current_scroll = $(window).scrollTop();
+       console.log("current scroll: ", current_scroll);
+
+       /* This prints out as if I affected the scrollTop, but then my window is still at the old location*/
+       $(window).scrollTop(current_scroll - 50);
+
+       var current_scroll = $(window).scrollTop();
+       console.log("current scroll: ", current_scroll);
    })
   </script>
 </body>

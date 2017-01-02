@@ -68,7 +68,9 @@ pub fn seen_show_handler() -> impl Handler {
                 println!("Adding now");
                 let mut seen_shows = seen_shows.write().unwrap();
                 println!("Got lock");
-                let _: bool = (*seen_shows).0.insert(unique_id);
+                seen_shows
+                    .insert_and_append(unique_id)
+                    .expect("Could not save seen shows");
                 ()
             };
             should_add
