@@ -35,6 +35,7 @@ fn handle_shows(req: &mut Request) -> IronResult<Response> {
         unique_id: String,
         episode: Episode,
         seen_class: String,
+        seen: bool,
     }
 
     #[derive(Serialize, Debug)]
@@ -61,8 +62,9 @@ fn handle_shows(req: &mut Request) -> IronResult<Response> {
         episodes.reverse();
         let episodes = episodes.into_iter()
             .map(|(unique_id, episode)| {
+                let seen = seen_shows.contains(&unique_id);
                 let seen_class = 
-                    if seen_shows.contains(&unique_id) {
+                    if seen {
                         "seen"
                     } else if episode.aire_date < today {
                         "new"
@@ -73,6 +75,7 @@ fn handle_shows(req: &mut Request) -> IronResult<Response> {
                      unique_id: unique_id.to_string(), 
                      episode, 
                      seen_class: seen_class.to_string(),
+                     seen,
                  }
             })
             .collect();

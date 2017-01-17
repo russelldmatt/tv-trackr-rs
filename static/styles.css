@@ -7,10 +7,13 @@ body {
 .aire_date {
     font-size: 80%;
 }
+
 .box {
-    display:inline-block;
+    transition: all .2s ease-in-out;
+    /* display:inline-block; */
     /* position:relative; */
     margin:10px;
+    margin: auto;
     padding:10px;
     border-radius:5px;
     /* font */
@@ -21,8 +24,20 @@ body {
 }
 
 /* Get bigger on hover */
-.box { transition: all .2s ease-in-out; }
 .box:hover { transform: scale(1.1); }
+
+.hidden-box {
+    /* display:inline-block; */
+    border-radius:5px;
+    /* font */
+    font-family: 'Didact Gothic', sans-serif;
+    /* font-family: 'Raleway', sans-serif; */
+    font-weight:normal;
+    text-align:center;
+    transition: all .1s ease-in-out;
+}
+
+.hidden-box:hover { transform: scale(1.02); }
 
 .new {
     /* background-color : LightGreen; */

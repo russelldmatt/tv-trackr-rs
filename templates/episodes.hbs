@@ -6,11 +6,11 @@
   <script type="text/javascript">
    currently_unhidden_id = null;
    
-   ToHidden = function(id) {
+   toHidden = function(id) {
        return "#hidden_" + id + "_seen"
    }
    
-   ToggleHidden = function(id) {
+   toggleHidden = function(id) {
        console.log("Toggling " + id);
        var hidden_div = $(id)
        if (hidden_div.css("display") == "none") {
@@ -23,15 +23,16 @@
    };
        
    ClickedId = function(id) {
-       var id = ToHidden(id);
+       var id = toHidden(id);
 
        if (currently_unhidden_id && !(currently_unhidden_id == id)) {
            console.log("Hiding " + currently_unhidden_id);
-           ToggleHidden(currently_unhidden_id)
+           toggleHidden(currently_unhidden_id)
        }
        
-       ToggleHidden(id)
+       toggleHidden(id)
    };
+   
    SeenId = function(id) {
        var resultDiv = $("#response_from_server");
        console.log("now I've seen: " + id);
@@ -40,15 +41,17 @@
            type: "POST",
            data: id,
            dataType: "json",
-           success: function (response) {
-               console.log("response: " + response);
-	       resultDiv.html(response);
-               if (response) {
-                   window.location.hash = '#' + id;
-                   window.location.reload(true);
-               } else {
-                   ToggleHidden(ToHidden(id));
+           success: function (newly_seen_ids) {
+               console.log("response: " + newly_seen_ids);
+               newly_seen_ids.forEach(function(id) {
+                   target = "#" + id + " > .box"
+                   $(target).removeClass("new");
+                   $(target).addClass("seen");
+               });
+               if (currently_unhidden_id == toHidden(id)) {
+                   toggleHidden(toHidden(id))
                }
+	       resultDiv.html(newly_seen_ids.join(' '));
            },
            error: function (xhr, ajaxOptions, thrownError) {
 	       alert(xhr.status);
@@ -60,17 +63,55 @@
 </head>
 
 <body>
-  <div id="response_from_server"></div>
+  <div id="response_from_server" style="display:none"></div>
   {{#each shows as |show|}}
     <div>
       <h3>{{ name }}</h3>
       <div style="white-space:nowrap">
 	{{#each show.episodes as |e|}}
-          <div id="{{ e.unique_id }}" style="display: inline-block;">
-            <div id="hidden_{{ e.unique_id }}_seen" class="hidden-box" onclick="SeenId('{{ e.unique_id }}')" style="display: none;">Mark as seen</div>
-	    <div class="box {{ e.seen_class }}" onclick="ClickedId('{{ e.unique_id }}')">
-	      Season {{ e.episode.season }}, Episode {{ e.episode.episode }}<br />
-	      <span class="aire_date">{{ date e.episode.aire_date }}</span><br />
+          <div
+              id="{{ e.unique_id }}" 
+              style="display: inline-block; margin: 10px;"
+          >
+            <div 
+                id="hidden_{{ e.unique_id }}_seen" 
+                class="hidden-box" 
+                style="display: none;"
+            >
+              {{#if e.seen }}
+              <div
+                  class="hidden-box new"
+                  onclick="SeenId('{{ e.unique_id }}')" 
+              >
+                Haven't seen
+              </div>
+              <div
+                  onclick="ClickedId('{{ e.unique_id }}')" 
+              >
+                Haven't seen all episodes <=
+              </div>
+              {{ else }}
+              <div
+                  class="hidden-box seen"
+                  onclick="SeenId('{{ e.unique_id }}')" 
+              >
+                Seen
+              </div>
+              <div
+                  onclick="ClickedId('{{ e.unique_id }}')" 
+              >
+                Seen all episodes <=
+              </div>
+              {{/if}}
+            </div>
+	    <div 
+                class="box {{ e.seen_class }}" 
+                onclick="ClickedId('{{ e.unique_id }}')" 
+            >
+	      Season {{ e.episode.season }}, Episode {{ e.episode.episode }}
+              <br />
+	      <span class="aire_date">{{ date e.episode.aire_date }}</span>
+              <br />
 	      {{ e.episode.name }}
 	    </div>
           </div>
@@ -78,21 +119,4 @@
       </div>
     </div>
   {{/each}}
-
-  <script>
-   <!-- This is so that after reload, the page is at the anchor. -->
-   $( document ).ready(function() {
-       if (window.location.hash) {
-           window.location.href = window.location.hash;
-       }
-       var current_scroll = $(window).scrollTop();
-       console.log("current scroll: ", current_scroll);
-
-       /* This prints out as if I affected the scrollTop, but then my window is still at the old location*/
-       $(window).scrollTop(current_scroll - 50);
-
-       var current_scroll = $(window).scrollTop();
-       console.log("current scroll: ", current_scroll);
-   })
-  </script>
 </body>

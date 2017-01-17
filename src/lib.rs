@@ -47,16 +47,16 @@ pub fn seen_show_handler() -> impl Handler {
         use std::io::Read;
         request.body.read_to_string(&mut payload).unwrap();
         println!("payload: {}", payload);
+        use std::str::FromStr;
+        let unique_id = 
+            show::UniqueId::from_str(&payload)
+            .expect("Could not parse unique_id from payload");
+        println!("unique id: {:?}", unique_id);
+
         let newly_added = 
         { 
             let arc = request.get_mut::<State<viewer_history::ViewerHistory>>().unwrap();
             let seen_shows = arc.as_ref();
-
-            use std::str::FromStr;
-            let unique_id = 
-                show::UniqueId::from_str(&payload)
-                .expect("Could not parse unique_id from payload");
-            println!("unique id: {:?}", unique_id);
 
             let should_add = {
                 let seen_shows = seen_shows.read().unwrap();
@@ -69,7 +69,7 @@ pub fn seen_show_handler() -> impl Handler {
                 let mut seen_shows = seen_shows.write().unwrap();
                 println!("Got lock");
                 seen_shows
-                    .insert_and_append(unique_id)
+                    .insert_and_append(unique_id.clone())
                     .expect("Could not save seen shows");
                 ()
             };
@@ -85,7 +85,11 @@ pub fn seen_show_handler() -> impl Handler {
         *count += 1;
 
         use serde_json;
-        let json_response = serde_json::value::Value::Bool(newly_added);
+        let json_response = {
+            let mut newly_seen_shows = vec![];
+            if newly_added { newly_seen_shows.push(serde_json::value::Value::String(unique_id.to_string())); };
+            serde_json::value::Value::Array(newly_seen_shows)
+        };
         let response = format!("{}", json_response);
         Ok(Response::with((status::Ok, response)))
     }
