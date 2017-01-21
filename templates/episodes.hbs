@@ -58,10 +58,10 @@
                        $(target).addClass("new");
                    };
                    var args = { update_state: false };
-                   toggleHidden("#hidden_" + id + "_havent_seen", args);
-                   toggleHidden("#hidden_" + id + "_havent_seen_up_to", args);
-                   toggleHidden("#hidden_" + id + "_seen", args);
-                   toggleHidden("#hidden_" + id + "_seen_up_to", args);
+                   toggleHidden("#" + id + "_havent_seen", args);
+                   toggleHidden("#" + id + "_havent_seen_up_to", args);
+                   toggleHidden("#" + id + "_seen", args);
+                   toggleHidden("#" + id + "_seen_up_to", args);
                });
                if (currently_unhidden_id == toHidden(id)) {
                    toggleHidden(toHidden(id), { update_state: true })
@@ -69,8 +69,8 @@
 	       resultDiv.html(newly_updated_ids.join(' '));
            },
            error: function (xhr, ajaxOptions, thrownError) {
-	       alert(xhr.status);
-	       alert(thrownError);
+	       console.log(xhr.status);
+	       console.log(thrownError);
            }
        });
    };
@@ -94,7 +94,7 @@
                 style="display: none;"
             >
               <div
-                  id="hidden_{{ e.unique_id }}_havent_seen" 
+                  id="{{ e.unique_id }}_havent_seen" 
                   class="hidden-box new"
                   onclick="ChangeSeenId('{{ e.unique_id }}', { update_to_seen: false, up_to: false})" 
                   {{#if e.seen }}{{ else }}style="display: none;"{{/if}}
@@ -102,7 +102,7 @@
                 Haven't seen
               </div>
               <div
-                  id="hidden_{{ e.unique_id }}_havent_seen_up_to" 
+                  id="{{ e.unique_id }}_havent_seen_up_to" 
                   class="hidden-box new"
                   onclick="ChangeSeenId('{{ e.unique_id }}', { update_to_seen: false, up_to: true})" 
                   {{#if e.seen }}{{ else }}style="display: none;"{{/if}}
@@ -110,7 +110,7 @@
                 Haven't seen all episodes <=
               </div>
               <div
-                  id="hidden_{{ e.unique_id }}_seen" 
+                  id="{{ e.unique_id }}_seen" 
                   class="hidden-box seen"
                   onclick="ChangeSeenId('{{ e.unique_id }}', { update_to_seen: true, up_to: false})" 
                   {{#if e.seen }}style="display: none;"{{ else }}{{/if}}
@@ -118,7 +118,7 @@
                 Seen
               </div>
               <div
-                  id="hidden_{{ e.unique_id }}_seen_up_to" 
+                  id="{{ e.unique_id }}_seen_up_to" 
                   class="hidden-box seen"
                   onclick="ChangeSeenId('{{ e.unique_id }}', { update_to_seen: true, up_to: true})" 
                   {{#if e.seen }}style="display: none;"{{ else }}{{/if}}
