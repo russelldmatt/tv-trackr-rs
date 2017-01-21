@@ -94,34 +94,36 @@
                   id="{{ e.unique_id }}_havent_seen"
                   {{#if e.seen }}{{ else }}style="display: none;"{{/if}}
               >
+                <div class="hidden-box" >Haven't seen: </div>
                 <div
                     class="hidden-box new"
                     onclick="ChangeSeenId('{{ e.unique_id }}', { update_to_seen: false, up_to: false})" 
                 >
-                  Haven't seen
+                  This
                 </div>
                 <div
                     class="hidden-box new"
                     onclick="ChangeSeenId('{{ e.unique_id }}', { update_to_seen: false, up_to: true})" 
                 >
-                  Haven't seen all up to
+                  All up to
                 </div>
               </div>
               <div
                   id="{{ e.unique_id }}_seen" 
                   {{#if e.seen }}style="display: none;"{{ else }}{{/if}}
               >
+                <div class="hidden-box" >Seen: </div>
                 <div
                     class="hidden-box seen"
                     onclick="ChangeSeenId('{{ e.unique_id }}', { update_to_seen: true, up_to: false})" 
                 >
-                  Seen
+                  This
                 </div>
                 <div
                     class="hidden-box seen"
                     onclick="ChangeSeenId('{{ e.unique_id }}', { update_to_seen: true, up_to: true})" 
                 >
-                  Seen all up to
+                  All up to
                 </div>
               </div>
             </div>
