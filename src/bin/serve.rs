@@ -44,12 +44,15 @@ fn main() {
     println!("#seen shows: {}", seen_shows.len());
 
     let router = router!(
-        hello_world:  get "/"         => hello_world::handler(),
-        log_file:     get "/log-file" => log_file::handler(),
-        count:        get "/count"    => counter::handler(),
-        hi:           get "/hi/:name" => hi::handler(),
-        template:     get "/template" => template::handler(shows),
-        seen_show:    post "/seen-show" => seen_show_handler(),
+        hello_world:      get "/"         => hello_world::handler(),
+        log_file:         get "/log-file" => log_file::handler(),
+        count:            get "/count"    => counter::handler(),
+        hi:               get "/hi/:name" => hi::handler(),
+        template:         get "/template" => template::handler(),
+        seen_show:        post "/seen-show" => seen_show_handler(Update::Seen, false),
+        seen_shows_up_to: post "/seen-shows-up-to" => seen_show_handler(Update::Seen, true),
+        havent_seen_show:        post "/havent-seen-show" => seen_show_handler(Update::NotSeen, false),
+        havent_seen_shows_up_to: post "/havent-seen-shows-up-to" => seen_show_handler(Update::NotSeen, true),
     );
 
     use mount::Mount;
@@ -63,9 +66,10 @@ fn main() {
 
     // CR mrussell: It's not right that tv_trackr library code relies on this being done.
     let mut chain = Chain::new(mount);
-    use persistent::{State};
+    use persistent::{State, Read};
     chain.link(State::<viewer_history::ViewerHistory>::both(seen_shows));
-    
+    chain.link_before(Read::<show::Shows>::one(shows));
+
     let sock_addr = "localhost:3000";
     let _server = Iron::new(chain).http(sock_addr).unwrap();
     println!("serving on {}...", sock_addr);

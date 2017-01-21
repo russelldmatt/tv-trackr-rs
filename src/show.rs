@@ -85,3 +85,9 @@ mod tests {
         assert_eq!(test_against, json);
     }
 }
+
+use iron::typemap::Key;
+#[derive(Copy, Clone)]
+pub struct Shows;
+impl Key for Shows { type Value = Vec<Show>; }
+

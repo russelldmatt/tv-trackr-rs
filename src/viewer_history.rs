@@ -39,6 +39,10 @@ impl ShowsSeen {
         Ok(ShowsSeen { file: CanAlter::No(file.to_string()), shows })
     }
 
+    pub fn remove(&mut self, unique_id: &show::UniqueId) -> bool {
+        self.shows.remove(unique_id)
+    }
+
     pub fn save(&self) -> io::Result<()> {
         // File::create will create the file if it does not exists and truncate if it does
         match self.file {

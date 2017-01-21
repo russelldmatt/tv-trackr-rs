@@ -6,16 +6,11 @@ use iron::middleware::Handler;
 use handlebars_iron::{HandlebarsEngine, DirectorySource, Template};
 use serde_json;
 
-use iron::typemap::Key;
 use persistent::{Read, State};
 
 use show;
 use show::*;
 use viewer_history;
-
-#[derive(Copy, Clone)]
-pub struct Shows;
-impl Key for Shows { type Value = Vec<Show>; }
 
 fn handle_shows(req: &mut Request) -> IronResult<Response> {
     println!("shows");
@@ -104,7 +99,7 @@ fn handle_shows(req: &mut Request) -> IronResult<Response> {
     Ok(response)
 }
 
-pub fn handler(shows: Vec<Show>) -> impl Handler {
+pub fn handler() -> impl Handler {
     // helpers
     // https://github.com/sunng87/handlebars-rust#extensible-helper-system
     use handlebars;
@@ -136,7 +131,6 @@ pub fn handler(shows: Vec<Show>) -> impl Handler {
     }
 
     let mut chain = Chain::new(handle_shows);
-    chain.link_before(Read::<Shows>::one(shows));
     chain.link_after(hbse);
     chain
 }

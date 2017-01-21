@@ -28,6 +28,8 @@ body {
 
 .hidden-box {
     /* display:inline-block; */
+    margin:5px;
+    padding:2px;
     border-radius:5px;
     /* font */
     font-family: 'Didact Gothic', sans-serif;

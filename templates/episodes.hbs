@@ -7,18 +7,19 @@
    currently_unhidden_id = null;
    
    toHidden = function(id) {
-       return "#hidden_" + id + "_seen"
+       return "#hidden_" + id
    }
-   
-   toggleHidden = function(id) {
+
+   toggleHidden = function(id, args) {
        console.log("Toggling " + id);
+       var update_state = args.update_state;
        var hidden_div = $(id)
        if (hidden_div.css("display") == "none") {
            hidden_div.css("display", "");
-           currently_unhidden_id = id;
+           if (update_state) { currently_unhidden_id = id; };
        } else {
            hidden_div.css("display", "none")
-           currently_unhidden_id = null;
+           if (update_state) { currently_unhidden_id = null; };
        }
    };
        
@@ -27,31 +28,45 @@
 
        if (currently_unhidden_id && !(currently_unhidden_id == id)) {
            console.log("Hiding " + currently_unhidden_id);
-           toggleHidden(currently_unhidden_id)
+           toggleHidden(currently_unhidden_id, { update_state: true })
        }
        
-       toggleHidden(id)
+       toggleHidden(id, { update_state: true })
    };
    
-   SeenId = function(id) {
+   ChangeSeenId = function(id, args) {
        var resultDiv = $("#response_from_server");
        console.log("now I've seen: " + id);
+       var up_to = args.up_to;
+       var update_to_seen = args.update_to_seen;
+       var url_basename_prefix = update_to_seen ? "" : "havent-";
+       var url_basename_suffix = up_to ? "seen-shows-up-to" : "seen-show";
        $.ajax({
-           url: "http://localhost:3000/seen-show",
+           url: "http://localhost:3000/" + url_basename_prefix + url_basename_suffix,
            type: "POST",
            data: id,
            dataType: "json",
-           success: function (newly_seen_ids) {
-               console.log("response: " + newly_seen_ids);
-               newly_seen_ids.forEach(function(id) {
+           success: function (newly_updated_ids) {
+               console.log("response: " + newly_updated_ids);
+               newly_updated_ids.forEach(function(id) {
                    target = "#" + id + " > .box"
-                   $(target).removeClass("new");
-                   $(target).addClass("seen");
+                   if (update_to_seen) {
+                       $(target).removeClass("new");
+                       $(target).addClass("seen");
+                   } else {
+                       $(target).removeClass("seen");
+                       $(target).addClass("new");
+                   };
+                   var args = { update_state: false };
+                   toggleHidden("#hidden_" + id + "_havent_seen", args);
+                   toggleHidden("#hidden_" + id + "_havent_seen_up_to", args);
+                   toggleHidden("#hidden_" + id + "_seen", args);
+                   toggleHidden("#hidden_" + id + "_seen_up_to", args);
                });
                if (currently_unhidden_id == toHidden(id)) {
-                   toggleHidden(toHidden(id))
+                   toggleHidden(toHidden(id), { update_state: true })
                }
-	       resultDiv.html(newly_seen_ids.join(' '));
+	       resultDiv.html(newly_updated_ids.join(' '));
            },
            error: function (xhr, ajaxOptions, thrownError) {
 	       alert(xhr.status);
@@ -74,35 +89,42 @@
               style="display: inline-block; margin: 10px;"
           >
             <div 
-                id="hidden_{{ e.unique_id }}_seen" 
+                id="hidden_{{ e.unique_id }}" 
                 class="hidden-box" 
                 style="display: none;"
             >
-              {{#if e.seen }}
               <div
+                  id="hidden_{{ e.unique_id }}_havent_seen" 
                   class="hidden-box new"
-                  onclick="SeenId('{{ e.unique_id }}')" 
+                  onclick="ChangeSeenId('{{ e.unique_id }}', { update_to_seen: false, up_to: false})" 
+                  {{#if e.seen }}{{ else }}style="display: none;"{{/if}}
               >
                 Haven't seen
               </div>
               <div
-                  onclick="ClickedId('{{ e.unique_id }}')" 
+                  id="hidden_{{ e.unique_id }}_havent_seen_up_to" 
+                  class="hidden-box new"
+                  onclick="ChangeSeenId('{{ e.unique_id }}', { update_to_seen: false, up_to: true})" 
+                  {{#if e.seen }}{{ else }}style="display: none;"{{/if}}
               >
                 Haven't seen all episodes <=
               </div>
-              {{ else }}
               <div
+                  id="hidden_{{ e.unique_id }}_seen" 
                   class="hidden-box seen"
-                  onclick="SeenId('{{ e.unique_id }}')" 
+                  onclick="ChangeSeenId('{{ e.unique_id }}', { update_to_seen: true, up_to: false})" 
+                  {{#if e.seen }}style="display: none;"{{ else }}{{/if}}
               >
                 Seen
               </div>
               <div
-                  onclick="ClickedId('{{ e.unique_id }}')" 
+                  id="hidden_{{ e.unique_id }}_seen_up_to" 
+                  class="hidden-box seen"
+                  onclick="ChangeSeenId('{{ e.unique_id }}', { update_to_seen: true, up_to: true})" 
+                  {{#if e.seen }}style="display: none;"{{ else }}{{/if}}
               >
                 Seen all episodes <=
               </div>
-              {{/if}}
             </div>
 	    <div 
                 class="box {{ e.seen_class }}" 

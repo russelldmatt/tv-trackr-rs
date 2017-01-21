@@ -33,15 +33,17 @@ pub mod hi;
 pub mod template;
 
 use iron::middleware::Handler;
-use iron::typemap::Key;
 use persistent::{State};
 
-pub fn seen_show_handler() -> impl Handler {
-    #[derive(Copy, Clone)]
-    pub struct Counter;
-    impl Key for Counter { type Value = i32; }
+#[derive(Clone, Copy)]
+pub enum Update {
+    Seen,
+    NotSeen,
+}
 
-    fn seen_show(request: &mut Request) -> IronResult<Response> {
+pub fn seen_show_handler(update: Update, up_to: bool) -> impl Handler {
+
+    fn seen_show(update: Update, up_to: bool, request: &mut Request) -> IronResult<Response> {
         use iron::status;    
         let mut payload = String::new();
         use std::io::Read;
@@ -53,50 +55,77 @@ pub fn seen_show_handler() -> impl Handler {
             .expect("Could not parse unique_id from payload");
         println!("unique id: {:?}", unique_id);
 
-        let newly_added = 
-        { 
-            let arc = request.get_mut::<State<viewer_history::ViewerHistory>>().unwrap();
-            let seen_shows = arc.as_ref();
+        let unique_ids_to_check = match up_to {
+            false => vec![unique_id],
+            true => {
+                let shows = request.get::<persistent::Read<show::Shows>>().unwrap();
+                let shows = shows.as_ref();
+                let show_name = unique_id.show.clone();
+                match shows.iter().find(|&show| { show.name == show_name }) {
+                    None => vec![],
+                    Some(show) => {
+                        show.episodes.keys().filter(|uid : &&show::UniqueId| {
+                            *uid <= &unique_id
+                        }).map(|uid : &show::UniqueId| (*uid).clone()).collect()
+                    }
+                }
+            }
+        };
 
-            let should_add = {
+        let arc = request.get_mut::<State<viewer_history::ViewerHistory>>().unwrap();
+        let seen_shows = arc.as_ref();
+
+        let newly_updated = | unique_id: show::UniqueId | -> bool { 
+            let should_update = {
                 let seen_shows = seen_shows.read().unwrap();
-                let exists = seen_shows.contains(&unique_id);
-                println!("is this unique id already in seen shows? {}", exists);
-                !exists
+                let seen_already = seen_shows.contains(&unique_id);
+                let updated = match update {
+                    Update::Seen => !seen_already,
+                    Update::NotSeen => seen_already,
+                };
+                println!("Should this unique id be updated? {}", updated);
+                updated
             };
-            if should_add {
-                println!("Adding now");
+            if should_update {
+                println!("Updating now");
                 let mut seen_shows = seen_shows.write().unwrap();
                 println!("Got lock");
-                seen_shows
-                    .insert_and_append(unique_id.clone())
-                    .expect("Could not save seen shows");
-                ()
+                match update { 
+                    Update::Seen => {
+                        seen_shows
+                        .insert_and_append(unique_id.clone())
+                        .expect("Could not save seen shows")
+                    },
+                    Update::NotSeen => {
+                        seen_shows.remove(&unique_id);
+                        seen_shows
+                            .save()
+                            .expect("Could not save seen shows")
+                    },
+                }
             };
-            should_add
+            should_update
         };
         // let request: Greeting = json::decode(&payload).unwrap();
         // let greeting = Greeting { msg: request.msg };
         // let payload = json::encode(&greeting).unwrap();
 
-        let arc = request.get_mut::<State<Counter>>().unwrap();
-        let count = arc.as_ref();
-        let mut count = count.write().unwrap();
-        *count += 1;
-
         use serde_json;
+        let updates = unique_ids_to_check.iter().filter(|&unique_id| {
+            newly_updated(unique_id.clone())
+        });
         let json_response = {
-            let mut newly_seen_shows = vec![];
-            if newly_added { newly_seen_shows.push(serde_json::value::Value::String(unique_id.to_string())); };
-            serde_json::value::Value::Array(newly_seen_shows)
+            serde_json::value::Value::Array(
+                updates.map(|unique_id: &show::UniqueId| {
+                    serde_json::value::Value::String(unique_id.to_string())
+                }).collect()
+            )
         };
         let response = format!("{}", json_response);
         Ok(Response::with((status::Ok, response)))
     }
 
-    let mut chain = Chain::new(seen_show);
-    chain.link(State::<Counter>::both(0));
-    chain
+    Chain::new(move |request: &mut Request| { seen_show(update, up_to, request) })
 }
 
 #[cfg(test)]
