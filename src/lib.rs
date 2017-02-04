@@ -27,7 +27,6 @@ pub mod scraped_show;
 pub mod viewer_history;
 mod unique_id;
 pub mod log_file;
-pub mod hi;
 pub mod template;
 
 use iron::middleware::Handler;

@@ -45,7 +45,6 @@ fn main() {
 
     let router = router!(
         log_file:         get "/log-file" => log_file::handler(),
-        hi:               get "/hi/:name" => hi::handler(),
         template:         get "/template" => template::handler(),
         seen_show:        post "/seen-show" => seen_show_handler(Update::Seen, false),
         seen_shows_up_to: post "/seen-shows-up-to" => seen_show_handler(Update::Seen, true),
