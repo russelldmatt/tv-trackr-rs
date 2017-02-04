@@ -3,7 +3,7 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::fs::File;
 use std::collections::HashMap;
-use show::*;
+use show;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct E {
@@ -27,7 +27,7 @@ pub enum ParseEpisodeError {
 }
 
 use std::convert::TryFrom;
-impl TryFrom<E> for Episode {
+impl TryFrom<E> for show::Episode {
     type Err = ParseEpisodeError;
 
     fn try_from(e: E) -> Result<Self, Self::Err> {
@@ -58,7 +58,7 @@ impl TryFrom<E> for Episode {
         let aire_date = parsed.to_naive_date().unwrap();
         
         let episode = 
-            Episode {
+            show::Episode {
                 name: e.name,
                 season: season,
                 episode: episode,
@@ -74,17 +74,17 @@ pub struct S {
     episodes: Vec<E>,
 }
 
-impl TryFrom<S> for Show {
+impl TryFrom<S> for show::Show {
     type Err = ParseEpisodeError;
 
     fn try_from(s: S) -> Result<Self, Self::Err> {
-        let show_name = Name::from(&s.name[..]);
-        let eps: Result<Vec<Episode>, Self::Err> = 
-            s.episodes.into_iter().map(|e| Episode::try_from(e)).collect();
-        let episodes: HashMap<UniqueId, Episode> = 
+        let show_name = show::Name::from(&s.name[..]);
+        let eps: Result<Vec<show::Episode>, Self::Err> = 
+            s.episodes.into_iter().map(|e| show::Episode::try_from(e)).collect();
+        let episodes: HashMap<show::UniqueId, show::Episode> = 
             eps?.into_iter().map(|ep| (ep.unique_id(show_name.clone()), ep)).collect();
         Ok (
-            Show {
+            show::Show {
                 name: show_name,
                 episodes
             }
