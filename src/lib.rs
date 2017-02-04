@@ -28,7 +28,6 @@ pub mod viewer_history;
 mod unique_id;
 pub mod hello_world;
 pub mod log_file;
-pub mod counter;
 pub mod hi;
 pub mod template;
 

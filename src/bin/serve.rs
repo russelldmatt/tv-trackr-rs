@@ -46,7 +46,6 @@ fn main() {
     let router = router!(
         hello_world:      get "/"         => hello_world::handler(),
         log_file:         get "/log-file" => log_file::handler(),
-        count:            get "/count"    => counter::handler(),
         hi:               get "/hi/:name" => hi::handler(),
         template:         get "/template" => template::handler(),
         seen_show:        post "/seen-show" => seen_show_handler(Update::Seen, false),
