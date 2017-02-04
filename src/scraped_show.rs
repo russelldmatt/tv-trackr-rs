@@ -14,16 +14,16 @@ pub struct Episode {
 
 use std::num::ParseIntError;    
 #[derive(Debug, PartialEq)]
-pub enum ParseSeasonOrEpisodeError {
-    CannotFindInEpisodeString,
+pub enum ParseError {
+    CannotFindInString,
     CannotFindInt,
     CannotParseInt(ParseIntError),
 }
 
 #[derive(Debug, PartialEq)]
 pub enum ParseEpisodeError {
-    ParseSeasonError(ParseSeasonOrEpisodeError),
-    ParseEpisodeError(ParseSeasonOrEpisodeError),
+    ParseSeasonError(ParseError),
+    ParseEpisodeError(ParseError),
 }
 
 use std::convert::TryFrom;
@@ -36,12 +36,12 @@ impl TryFrom<Episode> for show::Episode {
         let parse_season_or_episode = |name: &mut Split<&str>, prefix: &str| {
             let season_or_episode = 
                 name.next()
-                .ok_or(ParseSeasonOrEpisodeError::CannotFindInEpisodeString)?;
+                .ok_or(ParseError::CannotFindInString)?;
             let int_string = 
                 season_or_episode.split(prefix).nth(1)
-                .ok_or(ParseSeasonOrEpisodeError::CannotFindInt)?;
+                .ok_or(ParseError::CannotFindInt)?;
             int_string.parse()
-                .map_err(ParseSeasonOrEpisodeError::CannotParseInt)
+                .map_err(ParseError::CannotParseInt)
         };
         let season: i32 = 
             parse_season_or_episode(&mut episode, "Season ")
@@ -105,7 +105,7 @@ pub fn load(file: &str) -> Result<Show, std::io::Error> {
         Ok(serde_json::from_str(&line).unwrap())
     }).collect();
     
-    let episodes = eps?;
+    let episodes = try!(eps);
     Ok (Show { name, episodes })
 }
 
