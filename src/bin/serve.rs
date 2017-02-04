@@ -9,6 +9,7 @@ extern crate tv_trackr;
 
 use iron::prelude::*;
 use tv_trackr::*;
+use viewer_history::Update;
 
 fn main() {
     // CR mrussell: obviously change...
@@ -44,11 +45,11 @@ fn main() {
     println!("#seen shows: {}", seen_shows.len());
 
     let router = router!(
-        template:         get "/template" => template::handler(),
-        seen_show:        post "/seen-show" => seen_show_handler(Update::Seen, false),
-        seen_shows_up_to: post "/seen-shows-up-to" => seen_show_handler(Update::Seen, true),
-        havent_seen_show:        post "/havent-seen-show" => seen_show_handler(Update::NotSeen, false),
-        havent_seen_shows_up_to: post "/havent-seen-shows-up-to" => seen_show_handler(Update::NotSeen, true),
+        template:                get  "/template"                => template::handler(),
+        seen_show:               post "/seen-show"               => update_handler(Update::Seen, false),
+        seen_shows_up_to:        post "/seen-shows-up-to"        => update_handler(Update::Seen, true),
+        havent_seen_show:        post "/havent-seen-show"        => update_handler(Update::NotSeen, false),
+        havent_seen_shows_up_to: post "/havent-seen-shows-up-to" => update_handler(Update::NotSeen, true),
     );
 
     use mount::Mount;

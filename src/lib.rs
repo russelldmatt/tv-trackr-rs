@@ -31,15 +31,10 @@ pub mod template;
 use iron::middleware::Handler;
 use persistent::{State};
 
-#[derive(Clone, Copy)]
-pub enum Update {
-    Seen,
-    NotSeen,
-}
+pub fn update_handler(update: viewer_history::Update, up_to: bool) -> impl Handler {
 
-pub fn seen_show_handler(update: Update, up_to: bool) -> impl Handler {
-
-    fn seen_show(update: Update, up_to: bool, request: &mut Request) -> IronResult<Response> {
+    fn seen_show(update: viewer_history::Update, up_to: bool, request: &mut Request)
+                 -> IronResult<Response> {
         use iron::status;    
         let mut payload = String::new();
         use std::io::Read;
@@ -71,44 +66,13 @@ pub fn seen_show_handler(update: Update, up_to: bool) -> impl Handler {
         let arc = request.get_mut::<State<viewer_history::ViewerHistory>>().unwrap();
         let seen_shows = arc.as_ref();
 
-        let newly_updated = | unique_id: show::UniqueId | -> bool { 
-            let should_update = {
-                let seen_shows = seen_shows.read().unwrap();
-                let seen_already = seen_shows.contains(&unique_id);
-                let updated = match update {
-                    Update::Seen => !seen_already,
-                    Update::NotSeen => seen_already,
-                };
-                println!("Should this unique id be updated? {}", updated);
-                updated
-            };
-            if should_update {
-                println!("Updating now");
-                let mut seen_shows = seen_shows.write().unwrap();
-                println!("Got lock");
-                match update { 
-                    Update::Seen => {
-                        seen_shows
-                        .insert_and_append(unique_id.clone())
-                        .expect("Could not save seen shows")
-                    },
-                    Update::NotSeen => {
-                        seen_shows.remove(&unique_id);
-                        seen_shows
-                            .save()
-                            .expect("Could not save seen shows")
-                    },
-                }
-            };
-            should_update
+        let is_newly_updated = | unique_id: show::UniqueId | -> bool { 
+            viewer_history::ShowsSeen::process_update(seen_shows, update, unique_id)
         };
-        // let request: Greeting = json::decode(&payload).unwrap();
-        // let greeting = Greeting { msg: request.msg };
-        // let payload = json::encode(&greeting).unwrap();
 
         use serde_json;
         let updates = unique_ids_to_check.iter().filter(|&unique_id| {
-            newly_updated(unique_id.clone())
+            is_newly_updated(unique_id.clone())
         });
         let json_response = {
             serde_json::value::Value::Array(
