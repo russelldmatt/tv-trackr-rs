@@ -44,7 +44,6 @@ fn main() {
     println!("#seen shows: {}", seen_shows.len());
 
     let router = router!(
-        hello_world:      get "/"         => hello_world::handler(),
         log_file:         get "/log-file" => log_file::handler(),
         hi:               get "/hi/:name" => hi::handler(),
         template:         get "/template" => template::handler(),

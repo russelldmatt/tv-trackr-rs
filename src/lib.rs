@@ -26,7 +26,6 @@ pub mod show;
 pub mod scraped_show;
 pub mod viewer_history;
 mod unique_id;
-pub mod hello_world;
 pub mod log_file;
 pub mod hi;
 pub mod template;
