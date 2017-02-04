@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use show;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct E {
+pub struct Episode {
     name: String,
     episode: String,
     aire_date: String,
@@ -27,10 +27,10 @@ pub enum ParseEpisodeError {
 }
 
 use std::convert::TryFrom;
-impl TryFrom<E> for show::Episode {
+impl TryFrom<Episode> for show::Episode {
     type Err = ParseEpisodeError;
 
-    fn try_from(e: E) -> Result<Self, Self::Err> {
+    fn try_from(e: Episode) -> Result<Self, Self::Err> {
         let mut episode = e.episode.split(", ");
         use std::str::Split;
         let parse_season_or_episode = |name: &mut Split<&str>, prefix: &str| {
@@ -69,15 +69,15 @@ impl TryFrom<E> for show::Episode {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct S {
+pub struct Show {
     name: String,
-    episodes: Vec<E>,
+    episodes: Vec<Episode>,
 }
 
-impl TryFrom<S> for show::Show {
+impl TryFrom<Show> for show::Show {
     type Err = ParseEpisodeError;
 
-    fn try_from(s: S) -> Result<Self, Self::Err> {
+    fn try_from(s: Show) -> Result<Self, Self::Err> {
         let show_name = show::Name::from(&s.name[..]);
         let eps: Result<Vec<show::Episode>, Self::Err> = 
             s.episodes.into_iter().map(|e| show::Episode::try_from(e)).collect();
@@ -92,7 +92,7 @@ impl TryFrom<S> for show::Show {
     }
 }
 
-pub fn load(file: &str) -> Result<S, std::io::Error> {
+pub fn load(file: &str) -> Result<Show, std::io::Error> {
     use serde_json;
 
     use std::path::Path;
@@ -100,12 +100,12 @@ pub fn load(file: &str) -> Result<S, std::io::Error> {
     let f = try!(File::open(file));
     let reader = BufReader::new(f);
 
-    let eps: Result<Vec<E>, std::io::Error> = reader.lines().map(|line| {
+    let eps: Result<Vec<Episode>, std::io::Error> = reader.lines().map(|line| {
         let line: String = try!(line);
         Ok(serde_json::from_str(&line).unwrap())
     }).collect();
     
     let episodes = eps?;
-    Ok (S { name, episodes })
+    Ok (Show { name, episodes })
 }
 

@@ -30,7 +30,7 @@ fn main() {
     let shows: Vec<show::Show> = show_files.iter().map(|basename| {
         let file = format!("/Users/mrussell/code/tv-trackr/show-episodes/{}", basename);
         use scraped_show;
-        let scraped_show: scraped_show::S = 
+        let scraped_show: scraped_show::Show = 
             scraped_show::load(&file)
             .map_err(|e| format!("Could not load scraped show {}, err: {}", file, e))
             .unwrap();
