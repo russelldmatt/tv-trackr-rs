@@ -10,42 +10,50 @@ extern crate tv_trackr;
 use iron::prelude::*;
 use tv_trackr::*;
 use viewer_history::Update;
+use std::path::Path;
 
-fn main() {
-    // CR mrussell: obviously change...
-    let show_files = [
-        "ballers.json",
-        "broad-city.json",
-        "brooklyn-99.json",
-        "game-of-thrones.json",
-        "its-always-sunny-in-philadelphia.json",
-        "last-man-on-earth.json",
-        "modern-family.json",
-        "narcos.json",
-        "south-park.json",
-        "the-league.json",
-        "the-night-of.json",
-        "westworld.json",
-        ];
+fn show_files(show_episode_dir: &str) -> Vec<String> {
+    std::fs::read_dir(Path::new(show_episode_dir)).unwrap()
+        .filter_map(|dir_entry| {
+            let path_buf = dir_entry.unwrap().path();
+            let path = path_buf.as_path();
+            if path.is_dir() { 
+                None
+            } else {
+                Some(path.to_str().unwrap().to_string())
+            }
+        })
+        .collect()
+}
 
-    let shows: Vec<show::Show> = show_files.iter().map(|basename| {
-        let file = format!("/Users/mrussell/code/tv-trackr/show-episodes/{}", basename);
-        use scraped_show;
+fn shows(show_files: Vec<String>) -> Vec<show::Show> {
+    use std::convert::TryFrom;
+    show_files.iter().map(|file| {
         let scraped_show: scraped_show::Show = 
             scraped_show::load(&file)
             .map_err(|e| format!("Could not load scraped show {}, err: {}", file, e))
             .unwrap();
-        use std::convert::TryFrom;
         show::Show::try_from(scraped_show).unwrap()
-    }).collect();
+    }).collect()
+}
 
+fn main() {
+    // CR mrussell: configurable
+    let show_episode_dir = "/Users/mrussell/code/tv-trackr/show-episodes";
+    let template_dir = "/Users/mrussell/code/rust/tv-trackr/templates/";
+    let seen_shows_file = "/Users/mrussell/code/rust/tv-trackr/data/seen_shows.txt";
+    let static_dir = "/Users/mrussell/code/rust/tv-trackr/static";
+
+    let show_files : Vec<String> = show_files(show_episode_dir);
+    for s in &show_files { println!("show file: {}", s) };
+    let shows: Vec<show::Show> = shows(show_files); 
     let seen_shows =
-        viewer_history::ShowsSeen::load("/Users/mrussell/code/rust/tv-trackr/data/seen_shows.txt")
+        viewer_history::ShowsSeen::load(seen_shows_file)
         .expect("Could not load seen shows");
     println!("#seen shows: {}", seen_shows.len());
 
     let router = router!(
-        template:                get  "/template"                => template::handler(),
+        template:                get  "/template"                => template::handler(&template_dir),
         seen_show:               post "/seen-show"               => update_handler(Update::Seen, false),
         seen_shows_up_to:        post "/seen-shows-up-to"        => update_handler(Update::Seen, true),
         havent_seen_show:        post "/havent-seen-show"        => update_handler(Update::NotSeen, false),
@@ -54,11 +62,10 @@ fn main() {
 
     use mount::Mount;
     use staticfile::Static;
-    use std::path::Path;
     let mut mount = Mount::new();
     mount
         .mount("/", router)
-        .mount("/static/", Static::new(Path::new("/Users/mrussell/code/rust/tv-trackr/static")))
+        .mount("/static", Static::new(Path::new(static_dir)))
         ;
 
     // CR mrussell: It's not right that tv_trackr library code relies on this being done.

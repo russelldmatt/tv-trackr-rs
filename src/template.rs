@@ -99,7 +99,7 @@ fn handle_shows(req: &mut Request) -> IronResult<Response> {
     Ok(response)
 }
 
-pub fn handler() -> impl Handler {
+pub fn handler(template_dir: &str) -> impl Handler {
     // helpers
     // https://github.com/sunng87/handlebars-rust#extensible-helper-system
     use handlebars;
@@ -119,12 +119,12 @@ pub fn handler() -> impl Handler {
 
     let mut hb = Handlebars::new();
     hb.register_helper("date", Box::new(date_helper));
-    // My episode names are already escaped due to the fact that they're scraped from html
+    // My episode names are already escaped due to the fact that
+    // they're scraped from html
     hb.register_escape_fn(handlebars::no_escape);
     let mut hbse = HandlebarsEngine::from(hb);
 
-    // CR mrussell: configurable tempate dir
-    hbse.add(Box::new(DirectorySource::new("/Users/mrussell/code/rust/tv-trackr/templates/", ".hbs")));
+    hbse.add(Box::new(DirectorySource::new(template_dir, ".hbs")));
     // load templates from all registered sources
     if let Err(r) = hbse.reload() {
         panic!("{}", r);
